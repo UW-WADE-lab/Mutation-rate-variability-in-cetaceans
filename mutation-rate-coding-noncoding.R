@@ -9,7 +9,8 @@ setwd("G:/My Drive/00 UW/00.5 W.A.D.E. lab resources/Intern Projects/Mutation ra
 
 # get metadata
 genome_metadata <- read.csv("05 metadata/genome_metadata.csv") %>% 
-  select(-X)
+  select(-X) %>% 
+  filter(reference == "Pmac")
 
 #### Get Pmac chromosome names -------------------------------------------------
 
@@ -19,7 +20,7 @@ pmac_chrom <- read.delim("05 metadata/Pmac_sequence_report.tsv", sep = "\t") %>%
 
 #### Create BED file for coding regions ----------------------------------------
 
-pmac_code <- read.delim("Pmac_protein_coding_regions.tsv", sep = "\t") %>% 
+pmac_code <- read.delim("06 coding_noncoding_snps/Pmac_protein_coding_regions.tsv", sep = "\t") %>% 
   select(Chromosome, Begin, End, Name) %>% 
   filter(Chromosome != "MT") %>% 
   filter(Chromosome != "") %>% 
@@ -28,8 +29,8 @@ pmac_code <- read.delim("Pmac_protein_coding_regions.tsv", sep = "\t") %>%
   rename("Chromosome" = RefSeq.seq.accession) %>% 
   relocate(Chromosome, .before = Begin)
 
-write_delim(pmac_code, file = "Pmac_protein_coding_regions.bed", delim = "\t", col_names = FALSE,
-            quote = "none")
+# write_delim(pmac_code, file = "06 coding_noncoding_snps/Pmac_protein_coding_regions.bed", delim = "\t", col_names = FALSE,
+#             quote = "none")
 
 # calculate total length of coding regions
 code_length <- pmac_code %>% 
@@ -39,7 +40,7 @@ code_length <- pmac_code %>%
 
 #### Create BED file for non-coding regions ------------------------------------
 
-pmac_noncode <- read.delim("Pmac_non_coding_regions.tsv", sep = "\t") %>% 
+pmac_noncode <- read.delim("06 coding_noncoding_snps/Pmac_non_coding_regions.tsv", sep = "\t") %>% 
   select(Accession, Chromosome, Begin, End, Name) %>% 
   filter(Chromosome != "MT") %>% 
   filter(Chromosome != "") %>% 
@@ -49,8 +50,8 @@ pmac_noncode <- read.delim("Pmac_non_coding_regions.tsv", sep = "\t") %>%
   rename("Chromosome" = RefSeq.seq.accession) %>% 
   relocate(Chromosome, .before = Begin)
 
-write_delim(pmac_noncode, file = "Pmac_non_coding_regions.bed", delim = "\t", col_names = FALSE,
-            quote = "none")
+# write_delim(pmac_noncode, file = "06 coding_noncoding_snps/Pmac_non_coding_regions.bed", delim = "\t", col_names = FALSE,
+#             quote = "none")
 
 # calculate total length of non-coding regions
 noncode_length <- pmac_noncode %>% 
@@ -69,9 +70,10 @@ noncode_length <- pmac_noncode %>%
 
 #### Read in txt files with number of SNPs in coding and noncoding regions -----
 
-coding_data_files <- list.files(pattern = "_coding_snps.txt")
+coding_data_files <- list.files(path = "06 coding_noncoding_snps/",
+                                pattern = "_coding_snps.txt")
 
-pcoding_data <- do.call(rbind, lapply(coding_data_files, 
+pcoding_data <- do.call(rbind, lapply(paste0("06 coding_noncoding_snps/", coding_data_files), 
                                      read.delim, sep=" ", 
                                      header = FALSE, 
                                      col.names = c("hets","homs","aallele"))) %>% 
@@ -80,9 +82,10 @@ pcoding_data <- do.call(rbind, lapply(coding_data_files,
   mutate(tot.length = code_length) %>% 
   mutate(snp_type = "coding")
 
-noncoding_data_files <- list.files(pattern = "noncoding_snps.txt")
+noncoding_data_files <- list.files(path = "06 coding_noncoding_snps/",
+                                   pattern = "noncoding_snps.txt")
 
-noncoding_data <- do.call(rbind, lapply(noncoding_data_files, 
+noncoding_data <- do.call(rbind, lapply(paste0("06 coding_noncoding_snps/", noncoding_data_files), 
                                       read.delim, sep=" ", 
                                       header = FALSE, 
                                       col.names = c("hets","homs","aallele"))) %>% 
@@ -131,8 +134,8 @@ for (i in 1:nrow(combined_data)) {
 }
 
 code_noncode_data <- code_noncode_data %>% 
-  mutate(suborder = case_when(species %in% c("Bmus","Egla","Bacu")~"Mysticete",
-                   species %in% c("Kbre","Igeo","Pele")~"Odontocete",
+  mutate(suborder = case_when(species %in% c("Bmus","Egla","Bacu", "Erob","Bric")~"Mysticete",
+                   species %in% c("Kbre","Igeo","Pele","Mden","Oorc","Psin")~"Odontocete",
                    TRUE~NA))
 
 #### Test for differentiation in rates in coding and non-coding regions --------
