@@ -47,14 +47,19 @@ load("Mutation-rate-coding-noncoding.Rdata")
 
 ## Abstract {-}
 
+Genomic mutation is the fundamental process driving evolutionary processes that result in contemporary species, subspecies, and populations. Thus, genomic studies of divergence, speciation, and evolutionary demographics rely on accurate estimates of mutation rate. Historically, mutation rates have been estimated using a small portion of the genome and/or averaged among multiple species within a family or order, but growing evidence indicates potentially high variability in mutation rate both across the genome and among species. Here, we examine variability in mutation rate within cetaceans using high-quality genomes from the Vertebrate Genome Project. We estimate mutation rate across a range of parameters, including choice of input reference genome, coding vs. non-coding regions, chromosome-specific, species-specific, and using a variety of read depths, divergence date estimate, and methods to calculate mutation rate, in order to determine which factors have the greatest effect on variability in mutation rate. We find that mutation rate is most variable among species, and consequently most affected by the choice of reference genome used in the alignment pipeline. Other parameters had trivial effects on mutation rate estimates in comparison. These results indicate the importance of thoughtful selection of the reference genome used in future cetacean genomic studies, in order to ensure accurate downstream analyses of evolutionary processes.
 
 ## Introduction {-}
 
 As the fundamental process underlying evolution, mutation drives processes such as divergence among species and evolutionary adaptation. The rate at which mutations accrue will ultimately determine the rate at which species diverge from each other or adapt to changes in their environment. 
 
-Conversely, contemporary estimates of species divergence and adaptation that are central to evolutionary and population genetics rely on accurate estimates of mutation rate. Biases in this estimate may be reflected in many downstream analyses that shape evolutionary biology and conservation, e.g. the timing of splits in genetic phylogenies, patterns of selective divergence as they relate to neutral variation, or the accuracy of evolutionary demographic analyses.
+Contemporary estimates of species divergence and adaptation that are central to evolutionary and population genetics rely on accurate estimates of mutation rate. Biases in this estimate may be reflected in many downstream analyses that shape evolutionary biology and conservation, e.g. the timing of splits in genetic phylogenies, patterns of selective divergence as they relate to neutral variation, or the accuracy of evolutionary demographic analyses.
 
-A growing body of evidence suggests that mutation rate is likely more variable than traditionally considered, and that it likely varies both within a single genome @ellegren_etal03 as well as among genomes (REF).
+A growing body of evidence indicates that mutation rate is varies across the genome @ellegren_etal03; @hodgkinson_eyre-walker11, and that site-specific variability is only partially context-dependent. Mutation rate variability also occurs among individual and species-specific genomes (REF), although this variability has been less well-documented to date. Further, there is little research examining the potential effect of input parameters in the genome alignment pipeline on the accurate tally of genomic mutations and downstream estimation of mutation rate. 
+
+The increasing accessibility of genomic sequencing technologies and high-quality reference genomes for marine mammals (cite VGP here) has precipitated an rise in the use of genomic techniques to address previously unanswered questions about the ecology and conservation of these species. Because these species are rare, remote, elusive, and protected, it is often difficult to obtain the sample size needed to accurately detect and describe ecological processes and patterns. In cases such as this, whole genome analyses increase sensitivity and power to describe these patterns using a smaller sample set, thus making it a potentiall powerful tool for studies of evolutionary ecology in marine mammals. These genomic studies in marine mammals, e.g. descriptions of evolutionary phylogenies or historical demographics of species, currently rely on estimates of mutation rate that are averaged across a family of species and often based on only a small portion of the genome. 
+
+Here, we explore mutation rate variability within the cetaceans, and describe the major drivers affecting variability in estimates of mutation rate, with the aim of providing insight and context into the estimation of an accurate and appropriate mutation rate in marine mammal genomics studies. We examine variability in mutation rate among species and suborders within the cetaceans and among chromosomes within each genome included in the study, as well as how mutation rate estimates may be affected by input parameters at various steps along the genome processing pipeline. These input parameters include the choice of reference genome used for alignment, read depth threshold for genotyping a locus, inclusion of coding or non-coding regions in the mutation rate estimate, divergence date estimate used in the mutation rate calculation, and method (PI or non-PI) used to calculate mutation rate.
 
 ## Methods {-}
 
@@ -63,15 +68,15 @@ A growing body of evidence suggests that mutation rate is likely more variable t
 
 Whole genome mutation rate variability is high among individual species (Figure 1). Phylogenetic pattern in mutation rate? e.g. mysticetes vs. odontocetes?
 
-```{r whole_genome_rate, fig.cap = "Top: Whole genome mutation rate for each cetacean species included in the study, using Pmac as the reference genome. Bottom: Mean mutation rate for mysticete and odontocete clades."}
+```{r whole_genome_rate, fig.cap = "Figure 1. Top: Whole genome mutation rate for each cetacean species included in the study, using Pmac as the reference genome. Bottom: Mean mutation rate for mysticete and odontocete clades."}
 
 ```
 
-The reference genome used affected mutation rate variablity by an order of magnitude in some species. Reference genomes for this analysis were chosen to reflect three periods of evolutionary divergence: deep, medium, and shallow. Mutation rate was highest in most species when compared to the deep divergence reference genome, indicating that mutation rate in cetaceans may have been higher in deep evolutionary time than current evolutionary time. Alignment to the middle divergence reference genome resulted in the lowest mutation rate estimates, and alignment to the shallow divergence reference genome resulted in mutation rate estimates that were intermediate between the deep and middle divergence reference genomes.
+The reference genome used affected mutation rate variablity by an order of magnitude in some species (Figure X). Reference genomes for this analysis were chosen to reflect three periods of evolutionary divergence: deep, medium, and shallow. Mutation rate was highest in most species when compared to the deep divergence reference genome, indicating that mutation rate in cetaceans may have been higher in deep evolutionary time than current evolutionary time. Alignment to the middle divergence reference genome resulted in the lowest mutation rate estimates, and alignment to the shallow divergence reference genome resulted in mutation rate estimates that were intermediate between the deep and middle divergence reference genomes.
 
 Mutation rate estimates in coding vs. noncoding regions were not significantly different within the mysticetes (ANOVA p=`r round(myst_coding_aov[[1]][["Pr(>F)"]][1],digits = 2)`) or within the odontocetes (ANOVA p=`r round(odon_coding_aov[[1]][["Pr(>F)"]][1], digits = 2)`). While mutation rate estimates for these two regions do differ visually (Figure X), the variability between coding and non-coding regions is less within the mysticetes and odontocetes than the variability between the two suborders.
 
-```{r coding_noncoding_mutation, fig.cap = "Mutation rate in coding vs. non-coding regions of the genome in both mysticetes and odontocetes."}
+```{r coding_noncoding_mutation, fig.cap = "Figure 3. Mutation rate in coding vs. non-coding regions of the genome in both mysticetes and odontocetes."}
 
 ggplot(data=code_noncode_data, aes(x=suborder,y=rate,fill=snp_type)) + 
   geom_boxplot() +
@@ -85,6 +90,12 @@ ggplot(data=code_noncode_data, aes(x=suborder,y=rate,fill=snp_type)) +
         axis.title.x = element_text(margin = margin(t=8,r=0,b=5,l=0))) +
   theme(text = element_text(size = 18))
 ```
+
+Similarly, mutation rates did not vary significantly among chromosomes within each species' genome (PVALUE HERE). While variability in mutation rate was qualitatively low among most chromosomes, especially compared to variability in mutaton rate among species (Figure X), we observed that the mutation rate in Chromosome XX was lower across all species included in the study (Figure X). We also found that mutation rate variability among chromosomes was consistent across species - e.g. mutation rate was lower than the species-specific average in Chromosomes XX, XX, and XX in all species, and higher than the species-specific average in Chromosomes XX and XX in all species. 
+
+Variability in mutation rate estimates by read depth here.
+
+We did not find that variability in divergence date estimates had a significant effect on mutation rate estimates (PVALUE HERE). Qualitatively, the difference in mutation rate estimates calculated using three divergence date estimates was trivial compared to the variability among species or among reference genomes (Supplementary Figure 1). The same statistical and qualitative pattern was true when calculating the difference in mutation rate caused by whether or not PI is used in the calculation (PVALUE HERE, Supplementary Figure 2).
 
 ## Discussion {-}
 
