@@ -174,7 +174,7 @@ ggplot(data=code_noncode_data, aes(x=snp_type,y=rate,shape=method,color=species)
 
 # optional violin plot, data aggregated across all species
 ggplot(data=code_noncode_data, aes(x=suborder,y=rate,fill=snp_type)) + 
-  geom_boxplot() +
+  geom_violin() +
   theme_light() +
   labs(x="Coding vs. noncoding regions", y="Mutations/site/generation", 
        title="Mutation Rate in coding vs. noncoding regions") +
