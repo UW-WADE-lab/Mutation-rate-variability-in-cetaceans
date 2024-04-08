@@ -88,7 +88,7 @@ mrate_lifespan <- whole_mrate_graph %>%
 
 ###PLOTS####--------------------------------------------------------------------
 #plot for whole mutation rate for only sperm whale refs-------------------------
-ggplot(data=whole_mrate_graph, aes(x=abbrev,y=rate,shape=div_est,color=species)) +
+ggplot(data=whole_mrate_graph, aes(x=abbrev,y=rate,shape=div_est,color=abbrev)) +
   geom_point(size=3.7) +
   labs(x="Species", y="Mutations/site/generation",
        title="Whole Genome Mutation Rate") +
@@ -98,7 +98,7 @@ ggplot(data=whole_mrate_graph, aes(x=abbrev,y=rate,shape=div_est,color=species))
   theme(plot.margin = unit(c(10,30,0,0), 'pt'), axis.title.y = element_text(margin = margin(t=0,r=12,b=0,l=5)),
         axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0))) +
   scale_shape_discrete(name="Divergence Date Estimate") +
-  scale_color_manual(values=pnw_palette(n=10,name="Sunset2")) +
+  scale_color_manual(values=pnw_palette(n=12,name="Sunset2")) +
   geom_hline(data=est2, mapping=aes(yintercept=yint, linetype="B")) +
   scale_linetype_discrete(labels=c('Odontocete nuclear\nmutation rate\n(Dornburg et al. 2012)'), 
                           name="Estimates")
