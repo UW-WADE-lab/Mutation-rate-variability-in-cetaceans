@@ -430,17 +430,35 @@ estimates of mutation rate. Biases in this estimate may be reflected in
 many downstream analyses that shape evolutionary biology and
 conservation, e.g. the timing of splits in genetic phylogenies, patterns
 of selective divergence as they relate to neutral variation, or the
-accuracy of evolutionary demographic analyses.</p>
-<p>A growing body of evidence indicates that mutation rate is varies
-across the genome <span class="citation">Ellegren, Smith, and Webster
+accuracy of evolutionary demographic analyses. For example, a recent
+analysis of baleen whale mutation rates based wild pedigrees indicates
+that mutation rates in these species is higher than previously estimated
+based on phylogenetic divergence; correcting the mitochondrial mutation
+rate in estimates of preexploitation North Atlantic humpback whale
+abundance reduces those estimates by 86% <span class="citation">(Suárez-Menéndez et al. 2023)</span> and considerably
+shifts our understanding of the recovery of that population. Further,
+early studies of mutation rate suggest a lack of direct relationship
+between mtDNA genetic diversity and population size <span class="citation">(Nabholz, Glémin, and Galtier 2008, REFS 18 from
+Nabholz)</span>.</p>
+<p>Mutation rates have been shown to vary widely across species [e.g.
+<span class="citation">Nabholz, Glémin, and Galtier (2009)</span>; <span class="citation">Bergeron et al. (2023)</span>; REFS 14, 43, 39 from
+Nabholz] and over time (REFS). Three broad hypotheses have been proposed
+to explain potential drivers of mutation rate variability among species.
+(1) The longevity hypothesis posits that mutation rate decreases with
+increased lifespan, allowing individuals to live for longer periods of
+time without adverse effects of the accumulation of harmful mutations
+over their lifetimes. (2) The generation time hypothesis, which posits
+that mutation rate XX. (3) The metabolic rate hypothesis posits that
+mutation rate increases with increasing metabolic rate (often proxied by
+body mass) due to the oxidative effects of metabolism on the cell.</p>
+<p>A growing body of evidence indicates that mutation rate varies across
+the genome <span class="citation">Ellegren, Smith, and Webster
 (2003)</span>; <span class="citation">Hodgkinson and Eyre-Walker
 (2011)</span>, and that site-specific variability is only partially
-context-dependent. Mutation rate variability also occurs among
-individual and species-specific genomes (REF), although this variability
-has been less well-documented to date. Further, there is little research
-examining the potential effect of input parameters in the genome
-alignment pipeline on the accurate tally of genomic mutations and
-downstream estimation of mutation rate.</p>
+context-dependent.</p>
+<p>Further, there is little research examining the potential effect of
+input parameters in the genome alignment pipeline on the accurate tally
+of genomic mutations and downstream estimation of mutation rate.</p>
 <p>The increasing accessibility of genomic sequencing technologies and
 high-quality reference genomes for marine mammals (cite VGP here) has
 precipitated an rise in the use of genomic techniques to address
@@ -459,17 +477,19 @@ genome.</p>
 <p>Here, we explore mutation rate variability within the cetaceans, and
 describe the major drivers affecting variability in estimates of
 mutation rate, with the aim of providing insight and context into the
-estimation of an accurate and appropriate mutation rate in marine mammal
-genomics studies. We examine variability in mutation rate among species
-and suborders within the cetaceans and among chromosomes within each
-genome included in the study, as well as how mutation rate estimates may
-be affected by input parameters at various steps along the genome
-processing pipeline. These input parameters include the choice of
-reference genome used for alignment, read depth threshold for genotyping
-a locus, inclusion of coding or non-coding regions in the mutation rate
-estimate, divergence date estimate used in the mutation rate
-calculation, and method (PI or non-PI) used to calculate mutation
-rate.</p>
+estimation of an accurate and appropriate mutation rate in cetacean
+genomics studies. We examine process driven variability by estimating
+taxon- and chromosome-specific mutation rates, and comparing
+species-specific mutation rates with key demographic traits considered
+to affect mutation rate. We also examine potential drivers of
+observation error by varying key parameters in the pipeline used to
+align genomes and estimate a mutation rate. These input parameters
+include the choice of reference genome used for alignment, minimum and
+maximum read depth threshold for genotyping a locus, inclusion of coding
+or non-coding regions in the mutation rate estimate, divergence date
+estimate used in the mutation rate calculation, and whether or not
+ancestral heterozygosity is included in the mutation rate
+calculation.</p>
 </div>
 <div id="methods" class="section level2 unnumbered">
 <h2 class="unnumbered">Methods</h2>
@@ -556,10 +576,26 @@ or BEAST phylogenies.</p>
 <p>Compared to whole-genome mutation rate estimates among species,
 estimates of mutation rates among chromosomes varied less. Chromosome XX
 was the exception to this, likely driven at least in part by</p>
+<p>Species-specific mutation rates evolve over time, and are affected by
+demographic parameters like lifespan, generation time, and population
+size. Pedigree-based mutation rate estimates are a promising emerging
+tool that produce highly accurate estimates of mutation rate via counts
+of de novo mutations in parent-offspring trios. However, important to
+keep in mind that these highly accurate estimates of mutation rate will
+reflect contemporary population demographics and may differ
+significantly from historical mutation rates. <strong>More here, REFS
+from Suarez-Menendes et al and Bergeron et al, Sung et
+al.).</strong></p>
 </div>
 <div id="REFERENCES" class="section level2 unnumbered">
 <h2 class="unnumbered">REFERENCES</h2>
 <div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-bergeron_etal23" class="csl-entry">
+Bergeron, Lucie A., Søren Besenbacher, Jiao Zheng, Panyi Li, Mads Frost
+Bertelsen, Benoit Quintard, Joseph I. Hoffman, et al. 2023.
+<span>“Evolution of the Germline Mutation Rate Across
+Vertebrates.”</span> <em>Nature</em> 615 (7951): 285–91. <a href="https://doi.org/10.1038/s41586-023-05752-y">https://doi.org/10.1038/s41586-023-05752-y</a>.
+</div>
 <div id="ref-ellegren_etal03" class="csl-entry">
 Ellegren, Hans, Nick GC Smith, and Matthew T Webster. 2003.
 <span>“Mutation Rate Variation in the Mammalian Genome.”</span>
@@ -570,6 +606,24 @@ Ellegren, Hans, Nick GC Smith, and Matthew T Webster. 2003.
 Hodgkinson, Alan, and Adam Eyre-Walker. 2011. <span>“Variation in the
 Mutation Rate Across Mammalian Genomes.”</span> <em>Nature Reviews
 Genetics</em> 12 (11): 756–66. <a href="https://doi.org/10.1038/nrg3098">https://doi.org/10.1038/nrg3098</a>.
+</div>
+<div id="ref-nabholz_etal08" class="csl-entry">
+Nabholz, Benoit, Sylvain Glémin, and Nicolas Galtier. 2008.
+<span>“Strong Variations of Mitochondrial Mutation Rate Across
+Mammals—the Longevity Hypothesis.”</span> <em>Molecular Biology and
+Evolution</em> 25 (1): 120–30. <a href="https://doi.org/10.1093/molbev/msm248">https://doi.org/10.1093/molbev/msm248</a>.
+</div>
+<div id="ref-Nabholz2009a" class="csl-entry">
+———. 2009. <span>“The Erratic Mitochondrial Clock: Variations of
+Mutation Rate, Not Population Size, Affect mtDNA Diversity Across Birds
+and Mammals.”</span> <em>BMC Evolutionary Biology</em> 9 (1): 1–13. <a href="https://doi.org/10.1186/1471-2148-9-54">https://doi.org/10.1186/1471-2148-9-54</a>.
+</div>
+<div id="ref-suarez-menendez_etal23" class="csl-entry">
+Suárez-Menéndez, Marcos, Martine Bérubé, Fabrício Furni, Vania E.
+Rivera-León, Mads-Peter Heide-Jørgensen, Finn Larsen, Richard Sears, et
+al. 2023. <span>“Wild Pedigrees Inform Mutation Rates and Historic
+Abundance in Baleen Whales.”</span> <em>Science</em> 381 (6661): 990–95.
+<a href="https://doi.org/10.1126/science.adf2160">https://doi.org/10.1126/science.adf2160</a>.
 </div>
 </div>
 <p><br></p>
