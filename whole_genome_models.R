@@ -2,8 +2,20 @@
 #Sophie Garrote 4/18/2024
 
 --------------------------------------------------------------------------------
+install.packages("lme4", type = "source")
+install.packages("lmerTest")
+install.packages("modelsummary")
+install.packages("corrplot")
+install.packages("ltm")
+library(ltm)
+library(modelsummary)
+library(lme4)
+library(lmerTest)
 library(tidyverse)
 library(gam)
+library(ggplot2)
+library(PNWColors)
+library(corrplot)
 
 setwd("C:/Users/Intern/Downloads")
 
@@ -12,17 +24,36 @@ load("Mutation-rate-variability-in-cetaceans/whole_mutation_rate_df.Rdata")
 genome_metadata <- read.csv("R_script_info_mrate.csv")
 
 ##CORRELATION TESTING-----------------------------------------------------------
-# rate and lifespan
-cor(whole_mrate_graph$rate, whole_mrate_graph$lifespan, use = "complete.obs")
-## 0.6834166
+# correlation matrix
+mrate_matrix_variables <- whole_mrate_graph %>% select(c("rate","gen_time","body_mass","lifespan"))
+mrate_var <- cor(mrate_matrix_variables, use = "complete.obs")
 
-# rate and body mass
-cor(whole_mrate_graph$rate, whole_mrate_graph$body_mass, use = "complete.obs")
-## 0.4883015
+##         rate      gen_time  body_mass lifespan
+#rate      1.0000000 0.9804021 0.4883015 0.7022131
+#gen_time  0.9804021 1.0000000 0.5320043 0.6950965
+#body_mass 0.4883015 0.5320043 1.0000000 0.8390742
+#lifespan  0.7022131 0.6950965 0.8390742 1.0000000
 
-# rate and gen time
-cor(whole_mrate_graph$rate, whole_mrate_graph$gen_time, use = "complete.obs")
-## 0.9839686
+corrplot(mrate_var, type = "upper", order = "hclust", addCoef.col = "black")
+
+# correlation between infraorder and lifespan?
+biserial.cor(whole_mrate_graph$lifespan, whole_mrate_graph$infraorder)
+# 0.5760454
+
+# Is mrate NORMALLY DISTRIBUTED?------------------------------------------------
+
+# mrate histogram (only Pmac + McGowan)
+hist(whole_mrate_graph$rate)
+shapiro.test(whole_mrate_graph$rate)
+# p-value = 0.63
+
+# mrate histogram (all references + estimates)
+hist(whole_mrate_data$rate)
+shapiro.test(whole_mrate_data$rate)
+# p-value = 1.789e-05
+
+## Yes, mrate is normally distributed for the set of data being used in 
+## modelling (only Pmac reference + McGowan estimate/whole_mrate_graph data frame)
 
 ##LIFESPAN + RATE MODELS--------------------------------------------------------
 
@@ -75,6 +106,36 @@ ggplot(data=whole_mrate_graph, aes(x=lifespan,y=rate)) +
 lifespan_model_exponential <- lm(formula = log(rate) ~ lifespan, data = whole_mrate_graph)
 summary(lifespan_model_exponential)
 
+#LINEAR model removing and predicting Mden lifespan
+whole_mrate_noMden <- whole_mrate_graph %>% filter(abbrev!='Mden')
+
+lifespan_noMden <- lm(formula = rate ~ lifespan, data=whole_mrate_noMden)
+summary(lifespan_noMden)
+
+Mden_mrate <- data.frame(rate = c(1.698803e-09))
+
+cc <- coef(lifespan_noMden)
+xnew <- (((1.698803e-09)-cc[1])/cc[2])
+xnew
+
+predict(lifespan_noMden, newdata=Mden_mrate)
+
+## Mden lifespan = 26.64755 (when function is inverted)
+
+##LINEAR MIXED MODEL------------------------------------------------------------
+# w/ a single random effect for INFRAORDER
+lme.1 <- lmer(rate ~ lifespan + (1 |infraorder), whole_mrate_graph)
+summary(lme.1)
+
+lme.2 <- lm(rate ~ lifespan, whole_mrate_graph)
+summary(lme.2)
+
+AIC(lme.1,lme.2)
+
+modelplot(lme.1)
+
+plot(coef(lme.1))
+
 ##BODY MASS + RATE MODELS-------------------------------------------------------
 #LINEAR model
 bodymass_model_lm <- lm(formula = rate ~ body_mass, data=whole_mrate_graph)
@@ -95,6 +156,24 @@ ggplot(data=whole_mrate_graph, aes(x=body_mass,y=rate)) +
                      name = "Infraorder") +
   geom_smooth(method = "lm", color = "black", size = 0.75, alpha = 0.20)
 
+#LINEAR model w/ Bmus outlier removed
+whole_mrate_noBmus <- whole_mrate_graph %>% filter(body_mass < 135000.000)
+
+bodymass_noBmus <- lm(formula = rate ~ body_mass, data=whole_mrate_noBmus)
+summary(bodymass_noBmus)
+
+ggplot(data=whole_mrate_noBmus, aes(x=body_mass,y=rate)) +
+  geom_point(aes(color=factor(infraorder)), size=3.7) +
+  labs(x="Body Mass (kg)", y="Mutations/site/generation",
+       title="Whole Genome Mutation Rate by Body Mass") +
+  theme_light() +
+  theme(text = element_text(size = 20)) +
+  theme(plot.margin = unit(c(10,30,0,0), 'pt'), axis.title.y = element_text(margin = margin(t=0,r=12,b=0,l=5)),
+        axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0))) +
+  scale_color_manual(values=pnw_palette(n=2,name="Sunset2"),
+                     name = "Infraorder") +
+  geom_smooth(method = "lm", color = "black", size = 0.75, alpha = 0.20)
+ 
 ##GEN TIME + RATE MODELS--------------------------------------------------------
 #LINEAR model
 gentime_model_lm <- lm(formula = rate ~ gen_time, data=whole_mrate_graph)
