@@ -74,6 +74,7 @@ est2 <- data.frame(yint=1.08e-8)
 #dataframe for mutation rates of multiple references----------------------------
 mult_refs_graph <- whole_mrate_data %>% group_by(species) %>% 
   filter(n()>3) %>% ungroup() %>%
+  filter(div_est == "McGowan") %>%
   mutate(ref_dist = reference) 
 
 mult_refs_graph$ref_dist[mult_refs_graph$ref_dist == 'Pmac'] <- 'Middle'
@@ -141,7 +142,8 @@ ggplot(data=whole_mrate_graph, aes(x=infraorder, y=rate)) +
   theme(text = element_text(size = 20)) +
   theme(plot.margin = unit(c(10,30,0,0), 'pt'), axis.title.y = element_text(margin = margin(t=0,r=12,b=0,l=5)),
         axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0))) +
-  scale_fill_manual(values=pnw_palette(n=2, name="Sunset2"))
+  scale_fill_manual(values=pnw_palette(n=2, name="Sunset2")) +
+  geom_point(size=2.7, alpha=0.75)
 
 #violin of different reference genome whole mutation rates---------------------
 
@@ -153,7 +155,7 @@ ggplot(data=mult_refs_graph, aes(x=reference, y=rate)) +
   theme(text = element_text(size = 20)) +
   theme(plot.margin = unit(c(10,30,0,0), 'pt'), axis.title.y = element_text(margin = margin(t=0,r=12,b=0,l=5)),
         axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0))) +
-  scale_fill_manual(values=pnw_palette(name="Sunset2"))
+  geom_point(size=2.7, alpha=0.75)
 
 #save dataframes
 save(whole_mrate_graph, whole_mrate_data, mult_refs_graph, est2, file = "C:/Users/Intern/Downloads/Mutation-rate-variability-in-cetaceans/whole_mutation_rate_df.Rdata")
