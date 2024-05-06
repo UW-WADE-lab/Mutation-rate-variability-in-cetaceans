@@ -194,3 +194,42 @@ ggplot(data=whole_mrate_graph, aes(x=gen_time,y=rate)) +
                      name = "Infraorder") +
   geom_smooth(method = "lm", color = "black", size = 0.75, alpha = 0.20)
 
+##ODONTOCETE LINEAR LIFESPAN----------------------------------------------------
+# dataframe for odontocetes
+odontocete_mrate <- whole_mrate_graph %>%  
+  filter(infraorder == "odontocete")
+
+#linear model
+odontocete_lm <- lm(formula = rate ~ lifespan, data=odontocete_mrate)
+summary(odontocete_lm)
+plot(odontocete_lm$fitted, odontocete_lm$residuals)
+
+ggplot(data=odontocete_mrate, aes(x=lifespan,y=rate)) +
+  geom_point( size=3.7) +
+  labs(x="Lifespan", y="Mutations/site/generation",
+       title="Whole Genome Mutation Rate of Odontocetes by Lifespan") +
+  theme_light() +
+  theme(text = element_text(size = 20)) +
+  theme(plot.margin = unit(c(10,30,0,0), 'pt'), axis.title.y = element_text(margin = margin(t=0,r=12,b=0,l=5)),
+        axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0))) +
+  geom_smooth(method = "lm", color = "black", size = 0.75, alpha = 0.20)
+
+##MYSTICETE LINEAR LIFESPAN-----------------------------------------------------
+# dataframe for mysticetes
+mysticete_mrate <- whole_mrate_graph %>%  
+  filter(infraorder == "mysticete")
+
+#linear model
+mysticete_lm <- lm(formula = rate ~ lifespan, data=mysticete_mrate)
+summary(mysticete_lm)
+plot(mysticete_lm$fitted, mysticete_lm$residuals)
+
+ggplot(data=mysticete_mrate, aes(x=lifespan,y=rate)) +
+  geom_point( size=3.7) +
+  labs(x="Lifespan", y="Mutations/site/generation",
+       title="Whole Genome Mutation Rate of Odontocetes by Lifespan") +
+  theme_light() +
+  theme(text = element_text(size = 20)) +
+  theme(plot.margin = unit(c(10,30,0,0), 'pt'), axis.title.y = element_text(margin = margin(t=0,r=12,b=0,l=5)),
+        axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0))) +
+  geom_smooth(method = "lm", color = "black", size = 0.75, alpha = 0.20)
