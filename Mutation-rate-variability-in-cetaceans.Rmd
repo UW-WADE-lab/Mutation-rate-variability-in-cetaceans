@@ -67,6 +67,15 @@ Here, we explore mutation rate variability within the cetaceans, and describe th
 
 ## Methods {-}
 
+Short-read sample genomes and reference files (mention which?) were retrieved from NCBI GenBank using SRAToolkit. Additional Hi-C format sample genomes from the European Nucleotide were obtained using the scripts provided by the archive for download. The sample files, directly after being downloaded, do not have flags demarking forward and reverse reads, so a reformatting command must be run using the BBMap program. Reference genomes also need additional processing before scripts can be run, they require indexing by bwa or bwa-mem2 for the short-read and Hi-C formats respectively. Lastly, bed files, which are required for the step that masks repeated reads in the genome, must be generated for the reference genomes.
+
+The short-read alignment script uses samtools, bcftools, bedtools, and bwa commands to align the sample genome to the reference genome and extract variants. Additional filtering steps using Picard’s repeat masking function alongside bedtools removes potential duplicate reads from the variants.
+
+Some of the sample genomes used in this study, however, were not in short-read format, but analyzed using Hi-C techniques, requiring a different script. This script still used samtools, bcftools, and bedtools, as only the steps aligning the reference genome needed to be altered. Instead of bwa, the bwa-mem2 module was instead used in alignment, which required re-indexing of any reference fna files, and the generation of an fai file using samtools faidx. Additionally, this more complicated alignment used external perl scripts to combine reads, as well as Picard for adding read groups (define significance of read groups and combining reads?). Picard is also used similarly to the short-read script in repeat-read masking with bedtools (significance of repeat masking?). The both alignment scripts culminate in a vcf file format, which can then be used in post-alignment processing. The scripts are used for every genome of their respective types and repeated for the multiple references a script may be aligned to.
+
+Post-alignment processing entails using the vcf scripts produced to extract the information needed to calculate whole genome mutation rates, as well as other analyses, such as chromosome-level mutation rate. The R script we are using to calculate mutation rate is derived from the Robinson et al. (2022) paper on vaquitas, with modifications made to loop through all the samples used in this study, as only one genome was used in the Robinson paper. This script requires the total number of SNPs, the number of heterozygous variants, the number of homozygous variants, the number of alternate allele variants, the species’ generation time, and the species’ divergence times to calculate mutation rate. The generation and divergence times are obtained externally from (insert examples of sources here?). As previously mentioned, the number of specific types of variants can be obtained from the vcf file format using lines of code created with the awk command. 
+
+(insert mutation rate proper equation?)
 
 ## Results {-}
 
