@@ -33,12 +33,13 @@ library(tidyverse)
 library(ggsci)
 library(PNWColors)
 library(pander)
+library(patchwork)
 ```
 
 ```{r data, cache = FALSE, warning = FALSE, message = FALSE, results = 'hide'}
 
 load("Mutation-rate-coding-noncoding.Rdata")
-
+load("whole_mutation_rate_df.Rdata")
 
 ```
 
@@ -79,10 +80,34 @@ Post-alignment processing entails using the vcf scripts produced to extract the 
 
 ## Results {-}
 
-Whole genome mutation rate variability is high among individual species (Figure 1). Phylogenetic pattern in mutation rate? e.g. mysticetes vs. odontocetes?
+Whole genome mutation rate variability is high among individual species (Figure 1). In addition to inter-specific variability in mutation rate, we found that phylogenetic inertia accounted for a large portion of this variability, i.e. mutation rates were significantly higher in mysticetes than in odontocetes (p = XXXX, Figure X).
 
-```{r whole_genome_rate, fig.cap = "Figure 1. Top: Whole genome mutation rate for each cetacean species included in the study, using Pmac as the reference genome. Bottom: Mean mutation rate for mysticete and odontocete clades."}
+```{r whole_genome_rate, fig.cap = "Figure 1. Top: Whole genome mutation rate for each cetacean species included in the study. Bottom: Mean mutation rate for mysticete and odontocete clades. Mutation rates in both subplots were estaimted using Pmac as the reference genome and divergence estimates from McGowen et al. 2020."}
+top <- ggplot(data=whole_mrate_graph, aes(x=abbrev,y=rate,shape=div_est,color=species)) +
+  geom_point(size=3.7) +
+  labs(x="Species", y="Mutations/site/generation") +
+  theme_light() +
+  theme(text = element_text(size = 20), plot.subtitle = element_text(size = 14)) +
+  guides(color=FALSE) +
+  theme(plot.margin = unit(c(10,30,0,0), 'pt'), axis.title.y = element_text(margin = margin(t=0,r=12,b=0,l=5)),
+        axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0))) +
+  scale_shape_discrete(guide="none") +
+  scale_color_manual(values=pnw_palette(n=14,name="Sunset2")) +
+  geom_hline(data=est2, mapping=aes(yintercept=yint, linetype="B")) +
+  scale_linetype_discrete(labels=c('Odontocete nuclear\nmutation rate\n(Dornburg et al. 2012)'), 
+                          name="Estimates")
 
+bottom <- ggplot(data=whole_mrate_graph, aes(x=infraorder, y=rate)) +
+  geom_violin() +
+  labs(x="Infraorder", y="Mutations/site/generation") +
+  theme_light() +
+  theme(text = element_text(size = 20)) +
+  theme(plot.margin = unit(c(10,30,0,0), 'pt'), axis.title.y = element_text(margin = margin(t=0,r=12,b=0,l=5)),
+        axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0))) +
+  scale_fill_manual(values=pnw_palette(n=2, name="Sunset2")) +
+  geom_point(size=2.7, alpha=0.75)
+
+top / bottom
 ```
 
 The reference genome used affected mutation rate variablity by an order of magnitude in some species (Figure X). Reference genomes for this analysis were chosen to reflect three periods of evolutionary divergence: deep, medium, and shallow. Mutation rate was highest in most species when compared to the deep divergence reference genome, indicating that mutation rate in cetaceans may have been higher in deep evolutionary time than current evolutionary time. Alignment to the middle divergence reference genome resulted in the lowest mutation rate estimates, and alignment to the shallow divergence reference genome resulted in mutation rate estimates that were intermediate between the deep and middle divergence reference genomes.
