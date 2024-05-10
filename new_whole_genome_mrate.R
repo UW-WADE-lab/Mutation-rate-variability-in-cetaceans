@@ -82,6 +82,9 @@ mult_refs_graph$ref_dist[mult_refs_graph$ref_dist == 'Egla'] <- 'Close'
 mult_refs_graph$ref_dist[mult_refs_graph$ref_dist == 'Oorc'] <- 'Close'
 mult_refs_graph$ref_dist[mult_refs_graph$ref_dist == 'Hamb'] <- 'Far'
 
+#anova for infraorder
+infraorder_aov <- aov(rate ~ infraorder, data = whole_mrate_graph)
+infraorder_aov
 
 ###PLOTS####--------------------------------------------------------------------
 #plot for whole mutation rate for only sperm whale refs-------------------------
@@ -158,5 +161,5 @@ ggplot(data=mult_refs_graph, aes(x=reference, y=rate)) +
   geom_point(size=2.7, alpha=0.75)
 
 #save dataframes
-save(whole_mrate_graph, whole_mrate_data, mult_refs_graph, est2, file = "C:/Users/Intern/Downloads/Mutation-rate-variability-in-cetaceans/whole_mutation_rate_df.Rdata")
+save(whole_mrate_graph, whole_mrate_data, mult_refs_graph, est2, infraorder_aov, file = "C:/Users/Intern/Downloads/Mutation-rate-variability-in-cetaceans/whole_mutation_rate_df.Rdata")
 
