@@ -80,17 +80,17 @@ Post-alignment processing entails using the vcf scripts produced to extract the 
 
 ## Results {-}
 
-Whole genome mutation rate variability is high among individual species (Figure 1). In addition to inter-specific variability in mutation rate, we found that phylogenetic inertia accounted for a large portion of this variability, i.e. mutation rates were significantly higher in mysticetes than in odontocetes (p = XXXX, Figure X).
+Whole genome mutation rate variability is high among individual species (Figure 1). In addition to inter-specific variability in mutation rate, we found that phylogenetic inertia accounted for a large portion of this variability, i.e. mutation rates were significantly higher in mysticetes than in odontocetes (p = `r format(summary(infraorder_aov)[[1]][1,5], digits = 2)`, Figure X).
 
-```{r whole_genome_rate, fig.cap = "Figure 1. Top: Whole genome mutation rate for each cetacean species included in the study. Bottom: Mean mutation rate for mysticete and odontocete clades. Mutation rates in both subplots were estaimted using Pmac as the reference genome and divergence estimates from McGowen et al. 2020."}
+```{r whole_genome_rate, fig.height = 8, fig.width = 8, fig.cap = "Figure 1. Top: Whole genome mutation rate for each cetacean species included in the study. Bottom: Mean mutation rate for mysticete and odontocete clades. Mutation rates in both subplots were estaimted using Pmac as the reference genome and divergence estimates from McGowen et al. 2020."}
 top <- ggplot(data=whole_mrate_graph, aes(x=abbrev,y=rate,shape=div_est,color=species)) +
   geom_point(size=3.7) +
   labs(x="Species", y="Mutations/site/generation") +
   theme_light() +
-  theme(text = element_text(size = 20), plot.subtitle = element_text(size = 14)) +
+  theme(text = element_text(size = 16), plot.subtitle = element_text(size = 14)) +
   guides(color=FALSE) +
   theme(plot.margin = unit(c(10,30,0,0), 'pt'), axis.title.y = element_text(margin = margin(t=0,r=12,b=0,l=5)),
-        axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0))) +
+        axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0)), legend.position = "none") +
   scale_shape_discrete(guide="none") +
   scale_color_manual(values=pnw_palette(n=14,name="Sunset2")) +
   geom_hline(data=est2, mapping=aes(yintercept=yint, linetype="B")) +
@@ -101,9 +101,9 @@ bottom <- ggplot(data=whole_mrate_graph, aes(x=infraorder, y=rate)) +
   geom_violin() +
   labs(x="Infraorder", y="Mutations/site/generation") +
   theme_light() +
-  theme(text = element_text(size = 20)) +
+  theme(text = element_text(size = 16)) +
   theme(plot.margin = unit(c(10,30,0,0), 'pt'), axis.title.y = element_text(margin = margin(t=0,r=12,b=0,l=5)),
-        axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0))) +
+        axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0)), legend_position = "none") +
   scale_fill_manual(values=pnw_palette(n=2, name="Sunset2")) +
   geom_point(size=2.7, alpha=0.75)
 
@@ -124,10 +124,9 @@ top <- ggplot(data=mult_refs_graph, aes(x=species,y=rate,shape=div_est,color=ref
   scale_shape_discrete(guide="none") +
   scale_color_manual(values=pnw_palette(n=3,name="Sunset2"), 
                      name="Reference Distance") +
-  geom_hline(data=est2, mapping=aes(yintercept=yint, linetype="B")) +
-  scale_linetype_discrete(labels=c('Odontocete nuclear\nmutation rate\n(Dornburg et al. 2012)'), 
-                          name="Estimates")
-
+  geom_hline(data=est2, mapping=aes(yintercept=yint),linetype="dotdash")
+  
+  
 bottom <- ggplot(data=mult_refs_graph, aes(x=reference, y=rate)) +
   geom_violin() +
   labs(x="Reference", y="Mutations/site/generation") +
