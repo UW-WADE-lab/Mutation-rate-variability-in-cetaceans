@@ -112,6 +112,33 @@ top / bottom
 
 The reference genome used affected mutation rate variablity by an order of magnitude in some species (Figure X). Reference genomes for this analysis were chosen to reflect three periods of evolutionary divergence: deep, medium, and shallow. Mutation rate was highest in most species when compared to the deep divergence reference genome, indicating that mutation rate in cetaceans may have been higher in deep evolutionary time than current evolutionary time. Alignment to the middle divergence reference genome resulted in the lowest mutation rate estimates, and alignment to the shallow divergence reference genome resulted in mutation rate estimates that were intermediate between the deep and middle divergence reference genomes.
 
+```{r coding_noncoding_mutation, fig.cap = "Figure 2. Top: Mutation rate using different reference genomes with various levels of evolutionary distance for each sample with multiple references. Bottom: Mutation references for each of the references used, Egla is the close reference for mysticetes and Oorc is the close reference for odontocete. Mutation rates in both subplots were estaimted using Pmac as the reference genome and divergence estimates from McGowen et al. 2020."}
+
+top <- ggplot(data=mult_refs_graph, aes(x=species,y=rate,shape=div_est,color=ref_dist)) +
+  geom_point(size=3.7) +
+  labs(x="Species", y="Mutations/site/generation") +
+  theme_light() +
+  theme(text = element_text(size = 20), plot.subtitle = element_text(size = 14)) +
+  theme(plot.margin = unit(c(10,30,0,0), 'pt'), axis.title.y = element_text(margin = margin(t=0,r=12,b=0,l=5)),
+        axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0))) +
+  scale_shape_discrete(guide="none") +
+  scale_color_manual(values=pnw_palette(n=3,name="Sunset2"), 
+                     name="Reference Distance") +
+  geom_hline(data=est2, mapping=aes(yintercept=yint, linetype="B")) +
+  scale_linetype_discrete(labels=c('Odontocete nuclear\nmutation rate\n(Dornburg et al. 2012)'), 
+                          name="Estimates")
+
+bottom <- ggplot(data=mult_refs_graph, aes(x=reference, y=rate)) +
+  geom_violin() +
+  labs(x="Reference", y="Mutations/site/generation") +
+  theme_light() +
+  theme(text = element_text(size = 20)) +
+  theme(plot.margin = unit(c(10,30,0,0), 'pt'), axis.title.y = element_text(margin = margin(t=0,r=12,b=0,l=5)),
+        axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0))) +
+  geom_point(size=2.7, alpha=0.75)
+
+top / bottom 
+```
 Mutation rate estimates in coding vs. noncoding regions were not significantly different within the mysticetes (ANOVA p=`r round(myst_coding_aov[[1]][["Pr(>F)"]][1],digits = 2)`) or within the odontocetes (ANOVA p=`r round(odon_coding_aov[[1]][["Pr(>F)"]][1], digits = 2)`). While mutation rate estimates for these two regions do differ visually (Figure X), the variability between coding and non-coding regions is less within the mysticetes and odontocetes than the variability between the two suborders.
 
 ```{r coding_noncoding_mutation, fig.cap = "Figure 3. Mutation rate in coding vs. non-coding regions of the genome in both mysticetes and odontocetes."}
@@ -129,9 +156,25 @@ ggplot(data=code_noncode_data, aes(x=suborder,y=rate,fill=snp_type)) +
   theme(text = element_text(size = 18))
 ```
 
-Similarly, mutation rates did not vary significantly among chromosomes within each species' genome (PVALUE HERE). While variability in mutation rate was qualitatively low among most chromosomes, especially compared to variability in mutaton rate among species (Figure X), we observed that the mutation rate in Chromosome XX was lower across all species included in the study (Figure X). We also found that mutation rate variability among chromosomes was consistent across species - e.g. mutation rate was lower than the species-specific average in Chromosomes XX, XX, and XX in all species, and higher than the species-specific average in Chromosomes XX and XX in all species. 
+Similarly, mutation rates did not vary significantly among chromosomes within each species' genome (PVALUE HERE). While variability in mutation rate was qualitatively low among most chromosomes, especially compared to variability in mutation rate among species (Figure X), we observed that the mutation rate in Chromosome XX was lower across all species included in the study (Figure X). We also found that mutation rate variability among chromosomes was consistent across species - e.g. mutation rate was lower than the species-specific average in Chromosomes XX, XX, and XX in all species, and higher than the species-specific average in Chromosomes XX and XX in all species. 
 
 Variability in mutation rate estimates by read depth here.
+
+Mutation rate variation with lifespan here.
+
+```{r whole_genome_models, fig.cap = "Figure X. Mutation rate of whole genomes and the lifespans of their samples alongside a linear model."}
+
+ggplot(data=whole_mrate_graph, aes(x=lifespan,y=rate)) +
+  geom_point(aes(color=factor(infraorder)), size=3.7) +
+  labs(x="Lifespan", y="Mutations/site/generation") +
+  theme_light() +
+  theme(text = element_text(size = 20)) +
+  theme(plot.margin = unit(c(10,30,0,0), 'pt'), axis.title.y = element_text(margin = margin(t=0,r=12,b=0,l=5)),
+        axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0))) +
+  scale_color_manual(values=pnw_palette(n=2,name="Sunset2"),
+                     name = "Infraorder") +
+  geom_smooth(method = "lm", color = "black", size = 0.75, alpha = 0.20)
+```
 
 We did not find that variability in divergence date estimates had a significant effect on mutation rate estimates (PVALUE HERE). Qualitatively, the difference in mutation rate estimates calculated using three divergence date estimates was trivial compared to the variability among species or among reference genomes (Supplementary Figure 1). The same statistical and qualitative pattern was true when calculating the difference in mutation rate caused by whether or not PI is used in the calculation (PVALUE HERE, Supplementary Figure 2).
 
