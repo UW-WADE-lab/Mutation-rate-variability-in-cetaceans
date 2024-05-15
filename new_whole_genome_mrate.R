@@ -7,9 +7,10 @@ library(tidyverse)
 
 setwd("C:/Users/Intern/Downloads")
 
-# get genome metadata-----------------------------------------------------------
+# get genome metadata and table data--------------------------------------------
 
 genome_metadata <- read.csv("R_script_info_mrate.csv")
+sample_table_data <- read.csv("sample_info_table.csv")
 
 # access files with whole genome numbers and altering column titles-------------
 data_files <- read.delim("cetacean_snps_au23.txt", sep = " ", header = FALSE) %>% 
@@ -161,5 +162,5 @@ ggplot(data=mult_refs_graph, aes(x=reference, y=rate)) +
   geom_point(size=2.7, alpha=0.75)
 
 #save dataframes
-save(whole_mrate_graph, whole_mrate_data, mult_refs_graph, est2, infraorder_aov, file = "C:/Users/Intern/Downloads/Mutation-rate-variability-in-cetaceans/whole_mutation_rate_df.Rdata")
+save(whole_mrate_graph, whole_mrate_data, mult_refs_graph, est2, infraorder_aov, sample_table_data, file = "C:/Users/Intern/Downloads/Mutation-rate-variability-in-cetaceans/whole_mutation_rate_df.Rdata")
 
