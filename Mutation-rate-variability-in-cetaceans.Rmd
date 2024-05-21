@@ -129,7 +129,11 @@ top <- ggplot(data=mult_refs_graph, aes(x=abbrev,y=rate,shape=div_est,color=ref_
   geom_hline(data=est2, mapping=aes(yintercept=yint),linetype="dotdash")
   
   
-bottom <- ggplot(data=mult_refs_graph, aes(x=reference, y=rate, fill = ref_dist)) +
+bottom <- mult_refs_graph %>% 
+  arrange(rate) %>%
+  mutate(reference = factor(reference, levels=c("Egla", "Oorc", "Pmac", "Hamb"))) %>%
+  mutate(ref_dist = factor(ref_dist, levels=c("Close", "Middle", "Far"))) %>%
+  ggplot(aes(x=reference, y=rate, fill = ref_dist)) +
   geom_violin() +
   labs(x="Reference genome", y="Mutations/\nsite/generation") +
   scale_fill_manual(values=pnw_palette(n=3,name="Sunset2"), 
