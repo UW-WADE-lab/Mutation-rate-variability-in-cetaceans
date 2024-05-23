@@ -68,12 +68,23 @@ Here, we explore mutation rate variability within the cetaceans, and describe th
 
 ## Methods {-}
 
-Short-read sample genomes and reference files (Tables X and X) were retrieved from NCBI GenBank using SRAToolkit. Additional Hi-C format sample genomes from the European Nucleotide were obtained using the scripts provided by the archive for download. The sample files, directly after being downloaded, do not have flags demarking forward and reverse reads, so a reformatting command must be run using the BBMap program. Reference genomes also need additional processing before scripts can be run, they require indexing by bwa or bwa-mem2 for the short-read and Hi-C formats respectively. Lastly, bed files, which are required for the step that masks repeated reads in the genome, must be generated for the reference genomes.
+Short-read sample genomes and reference files (Tables 1 and 2) were retrieved from NCBI GenBank using SRAToolkit. Additional Hi-C format sample genomes from the European Nucleotide Archive were obtained using the scripts provided by the archive for download. The sample files, directly after being downloaded, do not have flags demarking forward and reverse reads, so a reformatting command must be run using the BBMap program. Reference genomes also need additional processing before scripts can be run, they require indexing by bwa or bwa-mem2 for the short-read and Hi-C formats respectively. Lastly, bed files, which are required for the step that masks repeated reads in the genome, must be generated for the reference genomes.
 
 ```{r sample_info_table}
-pandoc.table(sample_table_data)
+
+sample_table_format <- sample_table_data %>% 
+  rename("Species" = species, "Abbreviation" = abbreviation, "Accession" = "accession..", "Infra-order reference" = close.reference) %>% 
+  mutate(Database = c(rep("NCBI", 6),"ENA",rep("NCBI", 4), rep("ERR",3))) %>% 
+  relocate(Database, .before = Accession)
+
+pander(sample_table_format, split.table = Inf, table.caption.prefix = "Table 1:", caption = "Species abbreviation codes, genome database, and accession number for each species included in the present study.")
 
 ```
+
+<br>
+
+<br>
+
 The short-read alignment script uses samtools, bcftools, bedtools, and bwa commands to align the sample genome to the reference genome and extract variants. Additional filtering steps using Picard’s repeat masking function alongside bedtools removes potential duplicate reads from the variants.
 
 Some of the sample genomes used in this study, however, were not in short-read format, but analyzed using Hi-C techniques, requiring a different script. This script still used samtools, bcftools, and bedtools, as only the steps aligning the reference genome needed to be altered. Instead of bwa, the bwa-mem2 module was instead used in alignment, which required re-indexing of any reference fna files, and the generation of an fai file using samtools faidx. Additionally, this more complicated alignment used external perl scripts to combine reads, as well as Picard for adding read groups (define significance of read groups and combining reads?). Picard is also used similarly to the short-read script in repeat-read masking with bedtools (significance of repeat masking?). The both alignment scripts culminate in a vcf file format, which can then be used in post-alignment processing. The scripts are used for every genome of their respective types and repeated for the multiple references a script may be aligned to.
@@ -85,6 +96,10 @@ Post-alignment processing entails using the vcf scripts produced to extract the 
 ## Results {-}
 
 Whole genome mutation rate variability is high among individual species (Figure 1). In addition to inter-specific variability in mutation rate, we found that phylogenetic inertia accounted for a large portion of this variability, i.e. mutation rates were significantly higher in mysticetes than in odontocetes (p = `r format(summary(infraorder_aov)[[1]][1,5], digits = 2)`, Figure X).
+
+<br>
+
+<br>
 
 ```{r whole_genome_rate, fig.height = 8, fig.width = 8, fig.cap = "Figure 1. Top: Whole genome mutation rate for each cetacean species included in the study. Bottom: Mean mutation rate for mysticete and odontocete clades. Mutation rates in both subplots were estaimted using Pmac as the reference genome and divergence estimates from McGowen et al. 2020. The dotted line represents an odontocete nuclear mutation rate estimate from Dornburg et al. 2012."}
 top <- ggplot(data=whole_mrate_graph, aes(x=abbrev,y=rate)) +
@@ -99,20 +114,28 @@ top <- ggplot(data=whole_mrate_graph, aes(x=abbrev,y=rate)) +
   geom_hline(data=est2, mapping=aes(yintercept=yint),linetype="dotdash") +
   scale_linetype_discrete(guide="none")
 
-bottom <- ggplot(data=whole_mrate_graph, aes(x=infraorder, y=rate)) +
+bottom <- ggplot(data=whole_mrate_graph, aes(x=infraorder, y=rate, fill=infraorder)) +
   geom_violin() +
   labs(x="Infraorder", y="Mutations/\nsite/generation") +
   theme_light() +
   theme(text = element_text(size = 16)) +
+  scale_fill_manual(values=pnw_palette(n=6,name="Cascades")[c(3,6)]) +
   theme(plot.margin = unit(c(10,30,0,0), 'pt'), axis.title.y = element_text(margin = margin(t=0,r=12,b=0,l=5)),
-        axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0))) +
-  scale_fill_manual(values=pnw_palette(n=2, name="Sunset2")) +
-  geom_point(size=2.7, alpha=0.75)
+        axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0)), legend.position = "none") +
+  geom_dotplot(binaxis = 'y', size=4, fill = "black")
   
 top / bottom
 ```
 
+<br>
+
+<br>
+
 The reference genome used affected mutation rate variablity by an order of magnitude in some species (Figure X). Reference genomes for this analysis were chosen to reflect three periods of evolutionary divergence: deep, medium, and shallow. Mutation rate was highest in most species when compared to the deep divergence reference genome, indicating that mutation rate in cetaceans may have been higher in deep evolutionary time than current evolutionary time. Alignment to the middle divergence reference genome resulted in the lowest mutation rate estimates, and alignment to the shallow divergence reference genome resulted in mutation rate estimates that were intermediate between the deep and middle divergence reference genomes.
+
+<br>
+
+<br>
 
 ```{r multi_refs, fig.height = 8, fig.width = 8, fig.cap = "Figure 2. Top: Mutation rate using different reference genomes with various levels of evolutionary distance for each sample with multiple references. The dotted line represents an odontocete nuclear mutation rate estimate from Dornburg et al. 2012. Bottom: Mutation references for each of the references used, Egla is the close reference for mysticetes and Oorc is the close reference for odontocete. Mutation rates in both subplots were estaimted using divergence estimates from McGowen et al. 2020."}
 
@@ -120,7 +143,7 @@ top <- ggplot(data=mult_refs_graph, aes(x=abbrev,y=rate,shape=div_est,color=ref_
   geom_point(size=3.7) +
   labs(x="Species", y="Mutations/\nsite/generation") +
   theme_light() +
-  theme(text = element_text(size = 20), plot.subtitle = element_text(size = 14)) +
+  theme(text = element_text(size = 16), plot.subtitle = element_text(size = 14)) +
   theme(plot.margin = unit(c(10,30,0,0), 'pt'), axis.title.y = element_text(margin = margin(t=0,r=12,b=0,l=5)),
         axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0)), legend.position = "none") +
   scale_shape_discrete(guide="none") +
@@ -139,7 +162,7 @@ bottom <- mult_refs_graph %>%
   scale_fill_manual(values=pnw_palette(n=3,name="Sunset2"), 
                      name="Reference Distance") +
   theme_light() +
-  theme(text = element_text(size = 20)) +
+  theme(text = element_text(size = 16)) +
   theme(plot.margin = unit(c(10,30,0,0), 'pt'), axis.title.y = element_text(margin = margin(t=0,r=12,b=0,l=5)),
         axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0)), legend.position = "bottom") +
   geom_dotplot(binaxis = 'y', size=4, fill = "black")
@@ -147,22 +170,35 @@ bottom <- mult_refs_graph %>%
 
 top / bottom 
 ```
+
+<br>
+
+<br>
+
 Mutation rate estimates in coding vs. noncoding regions were not significantly different within the mysticetes (ANOVA p=`r round(myst_coding_aov[[1]][["Pr(>F)"]][1],digits = 2)`) or within the odontocetes (ANOVA p=`r round(odon_coding_aov[[1]][["Pr(>F)"]][1], digits = 2)`). While mutation rate estimates for these two regions do differ visually (Figure X), the variability between coding and non-coding regions is less within the mysticetes and odontocetes than the variability between the two suborders.
 
-```{r coding_noncoding_mutation, fig.cap = "Figure 3. Mutation rate in coding vs. non-coding regions of the genome in both mysticetes and odontocetes."}
+
+<br>
+
+<br>
+
+```{r coding_noncoding_mutation, fig.align = "center", fig.cap = "Figure 3. Mutation rate in coding vs. non-coding regions of the genome in both mysticetes and odontocetes."}
 
 ggplot(data=code_noncode_data, aes(x=suborder,y=rate,fill=snp_type)) + 
   geom_boxplot() +
   theme_light() +
   labs(y="Mutations/site/generation", x="") +
-    #scale_shape_discrete(labels=c('w/o ancestral\nheterozygosity', 'w/ ancestral\nheterozygosity'), name="Method") +
-  scale_fill_manual(values=pnw_palette(n=3,name="Sunset2"), 
+    scale_fill_manual(values=pnw_palette(n=8,name="Lake")[c(4,6)], 
                      #labels=c("Risso's dolphin","Short-finned\npilot whale","Indo-Pacific\nhumpback dolphin"),
                      name="SNP locus") +
   theme(axis.title.y = element_text(margin = margin(t=0,r=8,b=0,l=5)),
         axis.title.x = element_text(margin = margin(t=8,r=0,b=5,l=0))) +
-  theme(text = element_text(size = 18))
+  theme(text = element_text(size = 16))
 ```
+
+<br>
+
+<br>
 
 Similarly, mutation rates did not vary significantly among chromosomes within each species' genome (PVALUE HERE). While variability in mutation rate was qualitatively low among most chromosomes, especially compared to variability in mutation rate among species (Figure X), we observed that the mutation rate in Chromosome XX was lower across all species included in the study (Figure X). We also found that mutation rate variability among chromosomes was consistent across species - e.g. mutation rate was lower than the species-specific average in Chromosomes XX, XX, and XX in all species, and higher than the species-specific average in Chromosomes XX and XX in all species. 
 
@@ -170,19 +206,27 @@ Variability in mutation rate estimates by read depth here.
 
 Mutation rate variation with lifespan here.
 
+<br>
+
+<br>
+
 ```{r whole_genome_models, fig.cap = "Figure X. Mutation rate of whole genomes and the lifespans of their samples alongside a linear model."}
 
 ggplot(data=whole_mrate_graph, aes(x=lifespan,y=rate)) +
   geom_point(aes(color=factor(infraorder)), size=3.7) +
   labs(x="Lifespan", y="Mutations/site/generation") +
   theme_light() +
-  theme(text = element_text(size = 20)) +
+  theme(text = element_text(size = 16)) +
   theme(plot.margin = unit(c(10,30,0,0), 'pt'), axis.title.y = element_text(margin = margin(t=0,r=12,b=0,l=5)),
         axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0))) +
-  scale_color_manual(values=pnw_palette(n=2,name="Sunset2"),
+  scale_color_manual(values=pnw_palette(n=6,name="Cascades")[c(3,6)],
                      name = "Infraorder") +
   geom_smooth(method = "lm", color = "black", size = 0.75, alpha = 0.20)
 ```
+
+<br>
+
+<br>
 
 We did not find that variability in divergence date estimates had a significant effect on mutation rate estimates (PVALUE HERE). Qualitatively, the difference in mutation rate estimates calculated using three divergence date estimates was trivial compared to the variability among species or among reference genomes (Supplementary Figure 1). The same statistical and qualitative pattern was true when calculating the difference in mutation rate caused by whether or not PI is used in the calculation (PVALUE HERE, Supplementary Figure 2).
 
