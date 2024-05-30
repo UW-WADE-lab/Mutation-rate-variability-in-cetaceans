@@ -130,7 +130,7 @@ summary(lme.1)
 lme.2 <- lm(rate ~ lifespan, whole_mrate_graph)
 summary(lme.2)
 
-AIC(lme.1,lme.2)
+AIC_lmm <- AIC(lme.1,lme.2)
 
 modelplot(lme.1)
 
@@ -233,3 +233,6 @@ ggplot(data=mysticete_mrate, aes(x=lifespan,y=rate)) +
   theme(plot.margin = unit(c(10,30,0,0), 'pt'), axis.title.y = element_text(margin = margin(t=0,r=12,b=0,l=5)),
         axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0))) +
   geom_smooth(method = "lm", color = "black", size = 0.75, alpha = 0.20)
+
+##save dataframes---------------------------------------------------------------
+save(lifespan_model_lm, lme.1, lme.2, AIC_lmm, file = "C:/Users/Intern/Downloads/Mutation-rate-variability-in-cetaceans/mrate_models_df.Rdata")
