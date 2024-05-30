@@ -184,13 +184,16 @@ Mutation rate estimates in coding vs. noncoding regions were not significantly d
 
 ```{r coding_noncoding_mutation, fig.align = "center", fig.cap = "Figure 3. Mutation rate in coding vs. non-coding regions of the genome in both mysticetes and odontocetes."}
 
-ggplot(data=code_noncode_data, aes(x=suborder,y=rate,fill=snp_type)) + 
-  geom_boxplot() +
+
+ggplot(data=code_noncode_data %>% filter(method == "noPI"), aes(x=suborder,y=rate,fill=snp_type, color=snp_type, alpha = 0.6)) + 
+  geom_violin() +
   theme_light() +
   labs(y="Mutations/site/generation", x="") +
     scale_fill_manual(values=pnw_palette(n=8,name="Lake")[c(4,6)], 
-                     #labels=c("Risso's dolphin","Short-finned\npilot whale","Indo-Pacific\nhumpback dolphin"),
                      name="SNP locus") +
+  scale_color_manual(values=pnw_palette(n=8,name="Lake")[c(4,6)], 
+                     name="SNP locus") +
+  scale_alpha(guide="none") +
   theme(axis.title.y = element_text(margin = margin(t=0,r=8,b=0,l=5)),
         axis.title.x = element_text(margin = margin(t=8,r=0,b=5,l=0))) +
   theme(text = element_text(size = 16))
