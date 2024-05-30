@@ -134,8 +134,8 @@ for (i in 1:nrow(combined_data)) {
 }
 
 code_noncode_data <- code_noncode_data %>% 
-  mutate(suborder = case_when(species %in% c("Bmus","Egla","Bacu", "Erob","Bric")~"Mysticete",
-                   species %in% c("Kbre","Igeo","Pele","Mden","Oorc","Psin")~"Odontocete",
+  mutate(suborder = case_when(species %in% c("Bmus","Egla","Bacu","Erob","Bric")~"Mysticete",
+                   species %in% c("Kbre","Igeo","Pele","Mden","Oorc","Psin","Ddel","Hamp","Scoe")~"Odontocete",
                    TRUE~NA))
 
 #### Test for differentiation in rates in coding and non-coding regions --------
@@ -162,7 +162,7 @@ ggplot(data=code_noncode_data, aes(x=snp_type,y=rate,shape=method,color=species)
   labs(x="Coding vs. noncoding regions", y="Mutations/site/generation", 
        title="Mutation Rate by region") +
   scale_shape_discrete(labels=c('w/o ancestral\nheterozygosity', 'w/ ancestral\nheterozygosity'), name="Method") +
-  scale_color_manual(values=pnw_palette(n=3,name="Sunset2"), 
+  scale_color_manual(values=pnw_palette(n=14,name="Sunset2"), 
                      #labels=c("Risso's dolphin","Short-finned\npilot whale","Indo-Pacific\nhumpback dolphin"),
                      name="Species") +
   theme(axis.title.y = element_text(margin = margin(t=0,r=8,b=0,l=5)),
