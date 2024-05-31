@@ -79,6 +79,8 @@ sample_table_format <- sample_table_data %>%
 
 pander(sample_table_format, split.table = Inf, table.caption.prefix = "Table 1:", caption = "Species abbreviation codes, genome database, and accession number for each species included in the present study.")
 
+pander(reference_table_data, split.table = Inf, table.caption.prefix = "Table 2:", caption = "Species abbreviation codes, genome database, and accession number for each species used as a reference genome for alignment in this study.")
+
 ```
 
 <br>
