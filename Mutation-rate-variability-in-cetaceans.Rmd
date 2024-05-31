@@ -116,15 +116,16 @@ top <- ggplot(data=whole_mrate_graph, aes(x=abbrev,y=rate)) +
   geom_hline(data=est2, mapping=aes(yintercept=yint),linetype="dotdash") +
   scale_linetype_discrete(guide="none")
 
-bottom <- ggplot(data=whole_mrate_graph, aes(x=infraorder, y=rate, fill=infraorder)) +
+bottom <- ggplot(data=whole_mrate_graph, aes(x=infraorder, y=rate, fill=infraorder, color=infraorder, alpha=0.6)) +
   geom_violin() +
   labs(x="Infraorder", y="Mutations/\nsite/generation") +
   theme_light() +
   theme(text = element_text(size = 16)) +
   scale_fill_manual(values=pnw_palette(n=6,name="Cascades")[c(3,6)]) +
+  scale_color_manual(values=pnw_palette(n=6,name="Cascades")[c(3,6)]) +
   theme(plot.margin = unit(c(10,30,0,0), 'pt'), axis.title.y = element_text(margin = margin(t=0,r=12,b=0,l=5)),
         axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0)), legend.position = "none") +
-  geom_dotplot(binaxis = 'y', size=4, fill = "black")
+  geom_dotplot(binaxis = 'y', size=4, fill = "black", color ="black", alpha = 1)
   
 top / bottom
 ```
@@ -158,7 +159,7 @@ bottom <- mult_refs_graph %>%
   arrange(rate) %>%
   mutate(reference = factor(reference, levels=c("Egla", "Oorc", "Pmac", "Hamb"))) %>%
   mutate(ref_dist = factor(ref_dist, levels=c("Close", "Middle", "Far"))) %>%
-  ggplot(aes(x=reference, y=rate, fill = ref_dist, color = ref_dist, alpha = 0.3)) +
+  ggplot(aes(x=reference, y=rate, fill = ref_dist, color = ref_dist, alpha = 0.6)) +
   geom_violin() +
   labs(x="Reference genome", y="Mutations/\nsite/generation") +
   scale_fill_manual(values=pnw_palette(n=3,name="Sunset2"), 
@@ -218,7 +219,7 @@ Mutation rate variation with lifespan here.
 
 <br>
 
-```{r whole_genome_models, fig.cap = "Figure X. Mutation rate of whole genomes and the lifespans of their samples alongside a linear model."}
+```{r whole_genome_models, fig.align = "center", fig.cap = "Figure X. Mutation rate of whole genomes and the lifespans of their samples alongside a linear model."}
 
 ggplot(data=whole_mrate_graph, aes(x=lifespan,y=rate)) +
   geom_point(aes(color=factor(infraorder)), size=3.7) +
