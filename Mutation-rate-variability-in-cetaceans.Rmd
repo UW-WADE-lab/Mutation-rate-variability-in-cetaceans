@@ -103,7 +103,7 @@ Whole genome mutation rate variability is high among individual species (Figure 
 
 <br>
 
-```{r whole_genome_rate, fig.height = 8, fig.width = 8, fig.cap = "Figure 1. Top: Whole genome mutation rate for each cetacean species included in the study. Bottom: Mean mutation rate for mysticete and odontocete clades. Mutation rates in both subplots were estaimted using Pmac as the reference genome and divergence estimates from McGowen et al. 2020. The dotted line represents an odontocete nuclear mutation rate estimate from Dornburg et al. 2012."}
+```{r whole_genome_rate, fig.align = "center", fig.height = 8, fig.width = 8, fig.cap = "Figure 1. Top: Whole genome mutation rate for each cetacean species included in the study. Bottom: Mean mutation rate for mysticete and odontocete clades. Mutation rates in both subplots were estaimted using Pmac as the reference genome and divergence estimates from McGowen et al. 2020. The dotted line represents an odontocete nuclear mutation rate estimate from Dornburg et al. 2012."}
 top <- ggplot(data=whole_mrate_graph, aes(x=abbrev,y=rate)) +
   geom_point(size=3.7) +
   labs(x="Species", y="Mutations/\nsite/generation") +
@@ -139,7 +139,7 @@ The reference genome used affected mutation rate variablity by an order of magni
 
 <br>
 
-```{r multi_refs, fig.height = 8, fig.width = 8, fig.cap = "Figure 2. Top: Mutation rate using different reference genomes with various levels of evolutionary distance for each sample with multiple references. The dotted line represents an odontocete nuclear mutation rate estimate from Dornburg et al. 2012. Bottom: Mutation references for each of the references used, Egla is the close reference for mysticetes and Oorc is the close reference for odontocete. Mutation rates in both subplots were estaimted using divergence estimates from McGowen et al. 2020."}
+```{r multi_refs,  fig.align = "center", fig.height = 8, fig.width = 8, fig.cap = "Figure 2. Top: Mutation rate using different reference genomes with various levels of evolutionary distance for each sample with multiple references. The dotted line represents an odontocete nuclear mutation rate estimate from Dornburg et al. 2012. Bottom: Mutation references for each of the references used, Egla is the close reference for mysticetes and Oorc is the close reference for odontocete. Mutation rates in both subplots were estaimted using divergence estimates from McGowen et al. 2020."}
 
 top <- ggplot(data=mult_refs_graph, aes(x=abbrev,y=rate,shape=div_est,color=ref_dist)) +
   geom_point(size=3.7) +
@@ -158,16 +158,19 @@ bottom <- mult_refs_graph %>%
   arrange(rate) %>%
   mutate(reference = factor(reference, levels=c("Egla", "Oorc", "Pmac", "Hamb"))) %>%
   mutate(ref_dist = factor(ref_dist, levels=c("Close", "Middle", "Far"))) %>%
-  ggplot(aes(x=reference, y=rate, fill = ref_dist)) +
+  ggplot(aes(x=reference, y=rate, fill = ref_dist, color = ref_dist, alpha = 0.3)) +
   geom_violin() +
   labs(x="Reference genome", y="Mutations/\nsite/generation") +
   scale_fill_manual(values=pnw_palette(n=3,name="Sunset2"), 
                      name="Reference Distance") +
+  scale_color_manual(values=pnw_palette(n=3,name="Sunset2"), 
+                     name="Reference Distance") +
+  scale_alpha(guide="none") +
   theme_light() +
   theme(text = element_text(size = 16)) +
   theme(plot.margin = unit(c(10,30,0,0), 'pt'), axis.title.y = element_text(margin = margin(t=0,r=12,b=0,l=5)),
         axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0)), legend.position = "bottom") +
-  geom_dotplot(binaxis = 'y', size=4, fill = "black")
+  geom_dotplot(binaxis = 'y', size=4, fill = "black", color = "black", alpha = 1)
 
 
 top / bottom 
