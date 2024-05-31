@@ -1,0 +1,57 @@
+---
+title: "Miscellaneous bash code for read depth and coding/noncoding analyses"
+format: html
+editor: visual
+execute: 
+  eval: false
+---
+
+## Coding/Non-coding
+
+Step 1, below, uses two new .bed files to identify SNPs in coding and non-coding regions. The .bed files are generated in an R script called mutation-rate-coding-noncoding.R.
+
+```{bash code_noncode_step_1}
+#|eval: false
+
+# noncoding
+bedtools intersect -a vcf_files/Scoe_flt.vcf -b Pmac_non_coding_regions.bed -header > code_noncode_vcf/Scoe_noncoding.vcf
+
+# coding
+bedtools intersect -a vcf_files/Scoe_flt.vcf -b Pmac_protein_coding_regions.bed -header > code_noncode_vcf/Scoe_coding.vcf
+
+```
+
+Following this, we can use the awk code written by Sophie to count all heterozygous, homozygous, and alternate allele sites.
+
+```{bash}
+
+# coding
+awk '{split($10,SUB,":")} BEGIN {het=0; hom=0; aallele=0} {if(SUB[1]=="0/1") {het+=1} else if(SUB[1]=="1/1") {hom+=1} else if(SUB[1]=="1/2") {aallele+=1}} END {print het, hom, aallele}' Scoe_coding.vcf >> Scoe_coding_snps.txt
+
+#non-coding
+awk '{split($10,SUB,":")} BEGIN {het=0; hom=0; aallele=0} {if(SUB[1]=="0/1") {het+=1} else if(SUB[1]=="1/1") {hom+=1} else if(SUB[1]=="1/2") {aallele+=1}} END {print het, hom, aallele}' Scoe_noncoding.vcf >> Scoe_cat_noncoding_snps.txt
+
+```
+
+One this is complete, we can use the existing R code for calculation mutation rate across chromosomes - with a few edits - to calculate mutaton rate in coding vs. non-coding regions and generate a plot. The edited R code currently lives in mutation-rate-coding-noncoding.R.
+
+## Read depth
+
+The bcftools command below omits the -v option that only outputs SNPs, resulting in a vcf file that includes all loci. Downstream filtering for read depth remains the same. This creates a new vcf file that will not replace the original vcf.
+
+```{bash}
+
+module load XXX\bcftools
+
+for FILE in *; do echo $FILE 
+
+sample=${FILE%%_*}
+
+echo $sample
+
+#samtools pileup for a single sample and call SNPs
+bcftools mpileup -Ou --threads 40 --max-depth 500 -f /path/to/reference $FILE | bcftools call -m -Ob -o /allsites_bam/${sample}_allsites.bcf
+#filter variants for depth
+bcftools view ${sample}_allsites.bcf | vcfutils.pl varFilter -d 10 -D 500 > ${sample}_allsites_flt.vcf
+done
+```
