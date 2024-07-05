@@ -159,14 +159,14 @@ Within this study, we consider the effect of the following pipeline variability 
 
 ### Phylogenetic or demographic effects on mutation rate
 
-Whole genome mutation rate variability is high among individual species (Figure 1). We found that infraorder accounted for apprxomiately 34% of this variability, with mutation rates that were significantly higher in mysticetes than in odontocetes  (ANOVA p = `r format(summary(infraorder_anova)[[1]][1,5], digits = 2)`, sum-of-square ratio = `r format(summary(infraorder_anova)[[1]][1,2]/(summary(infraorder_anova)[[1]][1,2]+summary(infraorder_anova)[[1]][2,2]), digits = 2)`, Figure 1). However, we did not observe a significant difference in mutation rate among the three families that we were able to test: Balaenopteridae, Delphinidae, and Ziphiidae (ANOVA p = `r format(summary(family_anova)[[1]][1,5], digits = 2)`).
+Whole genome mutation rate variability is high among individual species (Figure 1). We found that infraorder accounted for approximately 34% of this variability, with mutation rates that were significantly higher in mysticetes than in odontocetes  (ANOVA p = `r format(summary(infraorder_anova)[[1]][1,5], digits = 2)`, sum-of-square ratio = `r format(summary(infraorder_anova)[[1]][1,2]/(summary(infraorder_anova)[[1]][1,2]+summary(infraorder_anova)[[1]][2,2]), digits = 2)`, Figure 1). However, we did not observe a significant difference in mutation rate among the three families with X or more species included in this study: Balaenopteridae, Delphinidae, and Ziphiidae (ANOVA p = `r format(summary(family_anova)[[1]][1,5], digits = 2)`).
 
 <br>
 
 <br>
 
 ```{r whole_genome_rate, fig.align = "center", fig.height = 8, fig.width = 8, fig.cap = "Figure 1. Top: Whole genome mutation rate for each cetacean species included in the study. Bottom: Mean mutation rate for mysticete and odontocete clades. Mutation rates in both subplots were estimated using Pmac as the reference genome and divergence estimates from McGowen et al. 2020. The dotted line represents an odontocete nuclear mutation rate estimate from Dornburg et al. 2012."}
-top <- ggplot(data=whole_mrate_graph, aes(x=abbrev,y=rate)) +
+top <- ggplot(data=species_mrate_gen, aes(x=abbrev,y=rate)) +
   geom_point(size=3.7) +
   labs(x="Species", y="Mutations/\nsite/generation") +
   theme_light() +
@@ -178,7 +178,8 @@ top <- ggplot(data=whole_mrate_graph, aes(x=abbrev,y=rate)) +
   geom_hline(aes(yintercept=1.08e-8, linetype="dotdash")) +
   scale_linetype_discrete(guide="none")
 
-bottom <- ggplot(data=whole_mrate_graph, aes(x=infraorder, y=rate, fill=infraorder, color = infraorder, alpha = 0.3)) +
+
+bottom <- ggplot(data=species_mrate_gen, aes(x=infraorder, y=rate, fill=infraorder, color=infraorder, alpha=0.6)) +
   geom_violin() +
   labs(x="Infraorder", y="Mutations/\nsite/generation") +
   theme_light() +
@@ -188,7 +189,7 @@ bottom <- ggplot(data=whole_mrate_graph, aes(x=infraorder, y=rate, fill=infraord
   scale_alpha(guide="none") +
   theme(plot.margin = unit(c(10,30,0,0), 'pt'), axis.title.y = element_text(margin = margin(t=0,r=12,b=0,l=5)),
         axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0)), legend.position = "none") +
-  geom_dotplot(binaxis = 'y', size=4, fill = "black")
+  geom_dotplot(binaxis = 'y', size=4, fill = "black", color ="black", alpha = 1)
   
 top / bottom
 ```
@@ -209,7 +210,7 @@ The reference genome used affected mutation rate variability by an order of magn
 
 ```{r multi_refs,  fig.align = "center", fig.height = 8, fig.width = 8, fig.cap = "Figure 2. Top: Mutation rate using different reference genomes with various levels of evolutionary distance for each sample with multiple references. The dotted line represents an odontocete nuclear mutation rate estimate from Dornburg et al. 2012. Bottom: Mutation references for each of the references used, Egla is the close reference for mysticetes and Oorc is the close reference for odontocete. Mutation rates in both subplots were estaimted using divergence estimates from McGowen et al. 2020."}
 
-top <- ggplot(data=mult_refs_graph, aes(x=abbrev,y=rate,shape=div_est,color=ref_dist)) +
+top <- ggplot(data=mult_refs_gen, aes(x=abbrev,y=rate,shape=div_est,color=ref_dist)) +
   geom_point(size=3.7) +
   labs(x="Species", y="Mutations/\nsite/generation") +
   theme_light() +
@@ -222,11 +223,11 @@ top <- ggplot(data=mult_refs_graph, aes(x=abbrev,y=rate,shape=div_est,color=ref_
   geom_hline(aes(yintercept=1.08e-8, linetype="dotdash"))
   
   
-bottom <- mult_refs_graph %>% 
+bottom <- mult_refs_gen %>% 
   arrange(rate) %>%
   mutate(reference = factor(reference, levels=c("Egla", "Oorc", "Pmac", "Hamb"))) %>%
   mutate(ref_dist = factor(ref_dist, levels=c("Close", "Middle", "Far"))) %>%
-  ggplot(aes(x=reference, y=rate, fill = ref_dist, color = ref_dist, alpha = 0.3)) +
+  ggplot(aes(x=reference, y=rate, fill = ref_dist, color = ref_dist, alpha = 0.6)) +
   geom_violin() +
   labs(x="Reference genome", y="Mutations/\nsite/generation") +
   scale_fill_manual(values=pnw_palette(n=3,name="Sunset2"), 
@@ -286,9 +287,9 @@ Mutation rate variation with lifespan here.
 
 <br>
 
-```{r whole_genome_models, fig.cap = "Figure X. Mutation rate of whole genomes and the lifespans of their samples alongside a linear model."}
+```{r whole_genome_models, fig.align = "center", fig.cap = "Figure X. Mutation rate of whole genomes and the lifespans of their samples alongside a linear model."}
 
-ggplot(data=whole_mrate_graph, aes(x=lifespan,y=rate)) +
+ggplot(data=species_mrate_gen, aes(x=lifespan,y=rate)) +
   geom_point(aes(color=factor(infraorder)), size=3.7) +
   labs(x="Lifespan", y="Mutations/site/generation") +
   theme_light() +
