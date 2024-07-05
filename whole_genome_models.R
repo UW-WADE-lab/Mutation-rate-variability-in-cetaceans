@@ -2,11 +2,11 @@
 #Sophie Garrote 4/18/2024
 
 --------------------------------------------------------------------------------
-install.packages("lme4", type = "source")
-install.packages("lmerTest")
-install.packages("modelsummary")
-install.packages("corrplot")
-install.packages("ltm")
+# install.packages("lme4", type = "source")
+# install.packages("lmerTest")
+# install.packages("modelsummary")
+# install.packages("corrplot")
+# install.packages("ltm")
 library(ltm)
 library(modelsummary)
 library(lme4)
@@ -17,65 +17,54 @@ library(ggplot2)
 library(PNWColors)
 library(corrplot)
 
-setwd("C:/Users/Intern/Downloads")
-
 #load data from whole_genome_rate R script
-load("Mutation-rate-variability-in-cetaceans/whole_mutation_rate_df.Rdata")
-genome_metadata <- read.csv("R_script_info_mrate.csv")
+load("whole_mutation_rate_df.Rdata")
+genome_metadata <- read.csv("genome_metadata.csv")
 
 ##CORRELATION TESTING-----------------------------------------------------------
 # correlation matrix
-mrate_matrix_variables <- whole_mrate_graph %>% select(c("rate","gen_time","body_mass","lifespan"))
-mrate_var <- cor(mrate_matrix_variables, use = "complete.obs")
+demographic_variables <- species_mrate_gen %>% dplyr::select(c("gen_time","body_mass","lifespan"))
+demographic_correlation <- cor(demographic_variables, use = "complete.obs")
 
-##         rate      gen_time  body_mass lifespan
-#rate      1.0000000 0.9804021 0.4883015 0.7022131
-#gen_time  0.9804021 1.0000000 0.5320043 0.6950965
-#body_mass 0.4883015 0.5320043 1.0000000 0.8390742
-#lifespan  0.7022131 0.6950965 0.8390742 1.0000000
-
-corrplot(mrate_var, type = "upper", order = "hclust", addCoef.col = "black")
+corrplot(demographic_correlation, type = "upper", order = "hclust", addCoef.col = "black")
 
 # correlation between infraorder and lifespan?
-biserial.cor(whole_mrate_graph$lifespan, whole_mrate_graph$infraorder)
+biserial.cor(species_mrate_gen$lifespan, species_mrate_gen$infraorder)
 # 0.5760454
 
 # Is mrate NORMALLY DISTRIBUTED?------------------------------------------------
 
 # mrate histogram (only Pmac + McGowan)
-hist(whole_mrate_graph$rate)
-shapiro.test(whole_mrate_graph$rate)
+hist(species_mrate_gen$rate)
+shapiro.test(species_mrate_gen$rate)
 # p-value = 0.63
 
 # mrate histogram (all references + estimates)
 hist(whole_mrate_data$rate)
 shapiro.test(whole_mrate_data$rate)
-# p-value = 1.789e-05
+# p-value = 2.2e-16
 
 ## Yes, mrate is normally distributed for the set of data being used in 
-## modelling (only Pmac reference + McGowan estimate/whole_mrate_graph data frame)
+## modeling (only Pmac reference + McGowan estimate/whole_mrate_graph data frame)
 
 ##LIFESPAN + RATE MODELS--------------------------------------------------------
 
 #LINEAR model and plot
-lifespan_model_lm <- lm(formula = rate ~ lifespan, data=whole_mrate_graph)
-summary(lifespan_model_lm)
+#lifespan
+lifespan_lm <- lm(formula = rate ~ lifespan, data=species_mrate_year)
+summary(lifespan_lm)
 
-lm.1 <- lm(rate ~ lifespan, whole_mrate_graph)
-plot(lm.1$fitted, lm.1$residuals)
+plot(lifespan_lm$fitted, lifespan_lm$residuals)
 
-ggplot(data=whole_mrate_graph, aes(x=lifespan,y=rate)) +
-  geom_point(aes(color=factor(infraorder)), size=3.7) +
-  labs(x="Lifespan", y="Mutations/site/generation",
-       title="Whole Genome Mutation Rate by Lifespan") +
-  theme_light() +
-  theme(text = element_text(size = 20)) +
-  theme(plot.margin = unit(c(10,30,0,0), 'pt'), axis.title.y = element_text(margin = margin(t=0,r=12,b=0,l=5)),
-        axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0))) +
-  scale_color_manual(values=pnw_palette(n=2,name="Sunset2"),
-                     name = "Infraorder") +
-  geom_smooth(method = "lm", color = "black", size = 0.75, alpha = 0.20)
+#generation time
+generation_lm <- lm(formula = rate ~ gen_time, data=species_mrate_year)
+summary(generation_lm)
 
+plot(generation_lm$fitted, generation_lm$residuals)
+
+#lifespan + generation_time
+lifegen_lm <- lm(formula = rate ~ lifespan + gen_time, data = species_mrate_year)
+summary(lifegen_lm)
 #NONLINEAR model
 gam.1 <- gam(rate ~ lifespan, data=whole_mrate_graph)
 gam.2 <- gam(rate ~ lo(lifespan), data=whole_mrate_graph)
@@ -235,4 +224,4 @@ ggplot(data=mysticete_mrate, aes(x=lifespan,y=rate)) +
   geom_smooth(method = "lm", color = "black", size = 0.75, alpha = 0.20)
 
 ##save dataframes---------------------------------------------------------------
-save(lifespan_model_lm, lme.1, lme.2, AIC_lmm, file = "C:/Users/Intern/Downloads/Mutation-rate-variability-in-cetaceans/mrate_models_df.Rdata")
+save(lifespan_model_lm, lme.1, lme.2, AIC_lmm, mrate_correlation, file = "mrate_models_df.Rdata")

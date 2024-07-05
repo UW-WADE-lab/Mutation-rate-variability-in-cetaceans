@@ -54,32 +54,38 @@ Genomic mutation is the fundamental process driving evolutionary processes that 
 
 As the fundamental process underlying evolution, mutation drives processes such as divergence among species and evolutionary adaptation. The rate at which mutations accrue will ultimately determine the rate at which species diverge from each other or adapt to changes in their environment. 
 
-Contemporary estimates of species divergence and adaptation that are central to evolutionary and population genetics rely on accurate estimates of mutation rate. Biases in this estimate may be reflected in many downstream analyses that shape evolutionary biology and conservation, e.g. the timing of splits in genetic phylogenies, patterns of selective divergence as they relate to neutral variation, or the accuracy of evolutionary demographic analyses. For example, a recent analysis of baleen whale mutation rates based wild pedigrees indicates that mutation rates in these species is higher than previously estimated based on phylogenetic divergence; correcting the mitochondrial mutation rate in estimates of preexploitation North Atlantic humpback whale abundance reduces those estimates by 86% [@suarez-menendez_etal23] and considerably shifts our understanding of the recovery of that population. Further, early studies of mutation rate suggest a lack of direct relationship between mtDNA genetic diversity and population size [@nabholz_etal08, REFS 18 from Nabholz]. 
+Contemporary estimates of species divergence and adaptation that are central to evolutionary and population genetics rely on accurate estimates of mutation rate. Biases in this estimate may be reflected in many downstream analyses that shape our understanding of evolutionary biology, e.g. the timing of splits in genetic phylogenies, patterns of selective divergence as they relate to neutral variation, or the accuracy of evolutionary demographic analyses. They may also have affect conservation priorities and management actions. For example, a recent analysis of baleen whale mutation rates based wild pedigrees indicates that mutation rates in these species is higher than previously estimated based on phylogenetic divergence; correcting the mitochondrial mutation rate previously used in genetic estimates of pre-exploitation North Atlantic humpback whale abundance reduces those estimates by 86% [@suarez-menendez_etal23] and considerably shifts our understanding of the recovery of that population. 
 
-Mutation rates have been shown to vary widely across species [e.g. @Nabholz2009a; @bergeron_etal23; REFS 14, 43, 39 from Nabholz] and over time (REFS). Three broad hypotheses have been proposed to explain potential drivers of mutation rate variability among species. (1) The longevity hypothesis posits that mutation rate decreases with increased lifespan, allowing individuals to live for longer periods of time without adverse effects of the accumulation of harmful mutations over their lifetimes. (2) The generation time hypothesis, which posits that mutation rate XX. (3) The metabolic rate hypothesis posits that mutation rate increases with increasing metabolic rate (often proxied by body mass) due to the oxidative effects of metabolism on the cell.
+Evolutionary demographic analysis relate genetic diversity, or the number of mutations in a given genetic lineage, to abundance via the coalescent theory. In these types of analyses especially, the mutation rate estimate used may have a drastic impact on our understanding of historic abundance of a population - and changes in the mutation rate over time could also affect the observed trends in abundance over time. Early studies of mutation rate suggest a lack of direct relationship between mtDNA genetic diversity and population size [@nabholz_etal08, REFS 18 from Nabholz]. Further, a growing body of evidence indicates that mutation rate varies across the genome, and that site-specific variability is only partially context-dependent [@ellegren_etal03; @hodgkinson_eyre-walker11]. Finally, mutation rate has been shown to vary over evolutionary timescales (REF).
 
-A growing body of evidence indicates that mutation rate varies across the genome @ellegren_etal03; @hodgkinson_eyre-walker11, and that site-specific variability is only partially context-dependent. 
+In addition to varying throughout the genome and through time, mutation rates have been shown to vary widely across species [e.g. @Nabholz2009a; @bergeron_etal23; REFS 14, 43, 39 from Nabholz]. Three broad hypotheses have been proposed to explain potential drivers of mutation rate variability among species. (1) The longevity hypothesis posits that mutation rate decreases with increased lifespan, allowing individuals to live for longer periods of time without adverse effects of the accumulation of harmful mutations over their lifetimes. (2) The generation time hypothesis, which posits that mutation rate XX. (3) The metabolic rate hypothesis posits that mutation rate increases with increasing metabolic rate (often proxied by body mass) due to the oxidative effects of metabolism on the cell.
 
-Further, there is little research examining the potential effect of input parameters in the genome alignment pipeline on the accurate tally of genomic mutations and downstream estimation of mutation rate. 
+The effects of demography, phylogeny, and genome location on mutation rate highlight the need to quantify mutation rate variability within taxonomic groups in order to inform downstream evolutionary and conservation genetic analyses. In addition to these factors, there are multiple decision points along the bioinformatic pipeline from sequence data to aligned genome that may affect the accurate tally of genomic mutations and downstream estimation of mutation rate. However, there is limited research on how the selection of these input parameters affects mutation rate estimates.
 
-The increasing accessibility of genomic sequencing technologies and high-quality reference genomes for marine mammals (cite VGP here) has precipitated an rise in the use of genomic techniques to address previously unanswered questions about the ecology and conservation of these species. Because these species are rare, remote, elusive, and protected, it is often difficult to obtain the sample size needed to accurately detect and describe ecological processes and patterns. In cases such as this, whole genome analyses increase sensitivity and power to describe these patterns using a smaller sample set, thus making it a potentiall powerful tool for studies of evolutionary ecology in marine mammals. These genomic studies in marine mammals, e.g. descriptions of evolutionary phylogenies or historical demographics of species, currently rely on estimates of mutation rate that are averaged across a family of species and often based on only a small portion of the genome. 
+The increasing accessibility of genomic sequencing technologies and high-quality reference genomes for marine mammals (cite VGP here) has precipitated an rise in the use of genomic techniques to address previously unanswered questions about the ecology and conservation of these species. Because these species are rare, remote, elusive, and protected, it is often difficult to obtain the sample size needed to accurately detect and describe ecological processes and patterns. In cases such as this, whole genome analyses increase sensitivity and power to describe genetic patterns using a smaller sample set, thus making it a potentially powerful tool for studies of evolutionary ecology in marine mammals. These genomic studies in marine mammals, e.g. descriptions of evolutionary phylogenies or historical demographics of species, currently rely on estimates of mutation rate that are averaged across a family of species and often based on only a small portion of the genome. 
 
 Here, we explore mutation rate variability within the cetaceans, and describe the major drivers affecting variability in estimates of mutation rate, with the aim of providing insight and context into the estimation of an accurate and appropriate mutation rate in cetacean genomics studies. We examine process driven variability by estimating taxon- and chromosome-specific mutation rates, and comparing species-specific mutation rates with key demographic traits considered to affect mutation rate. We also examine potential drivers of observation error by varying key parameters in the pipeline used to align genomes and estimate a mutation rate. These input parameters include the choice of reference genome used for alignment, minimum and maximum read depth threshold for genotyping a locus, inclusion of coding or non-coding regions in the mutation rate estimate, divergence date estimate used in the mutation rate calculation, and whether or not ancestral heterozygosity is included in the mutation rate calculation.
 
 ## Methods {-}
 
-Short-read sample genomes and reference files (Tables 1 and 2) were retrieved from NCBI GenBank using SRAToolkit. Additional Hi-C format sample genomes from the European Nucleotide Archive were obtained using the scripts provided by the archive for download. The sample files, directly after being downloaded, do not have flags demarking forward and reverse reads, so a reformatting command must be run using the BBMap program. Reference genomes also need additional processing before scripts can be run, they require indexing by bwa or bwa-mem2 for the short-read and Hi-C formats respectively. Lastly, bed files, which are required for the step that masks repeated reads in the genome, must be generated for the reference genomes.
+### Sample and reference genome preparation {-}
+
+We acquired genomes from fourteen cetacean species, representing the breadth of cetacean phylogenetic diversity, from NCBI Genbank and the European Nucleotide Archive using SRAToolkit (REF, Table 1). Genomic data were generated by the Vertebrate Genome Progect (REF) using either Illumina short-read or Dovetail Hi-C approaches (REFS?). Prior to sequence assembly, we formatted all sequence files using BBMap (REF) to flag forward and reverse reads. Sequence files were formatted  assembly using BBMap (REF). 
+
+In order to test for the effect of reference genome on the resulting mutation rate, we selected four reference genomes representing a deeply diverged taxon, a recently diverged taxon, and an intermediate taxon (Table 2). The deeply diverged taxon is represented by the hippopotamus (*Hippopotamus amphibius*), and the intermediate taxon is represented by the sperm whale (*Physeter macrocephaluS*). We selected two species to represent the recently diverged taxon: the killer whale (*Orcinus orca*) is used for all odontocetes, and the North Atlantic right whale (*Eubalaena glacialis*) is used for all mysticetes.
+
+We downloaded all reference genomes as fastq files from NCBI Genbank, and created index files using bwa (REF). Sample genomes that were generated using Dovetail Hi-C require additional index files, which we generated using bwa-mem2 and samtools (REFS). Finally, we mapped repeats and created a repeat masker for each reference file using bedtools (REF). All steps described here, making up the pre-alignment pipeline, are outlined at: https://github.com/UW-WADE-lab/Whole-Genome-Alignment
 
 ```{r sample_info_table}
 
 sample_table_format <- sample_table_data %>% 
-  rename("Species" = species, "Abbreviation" = abbreviation, "Accession" = "accession..", "Infra-order reference" = close.reference) %>% 
-  mutate(Database = c(rep("NCBI", 6),"ENA",rep("NCBI", 4), rep("ERR",3))) %>% 
+  rename("Species" = species, "Abbreviation" = abbreviation, "Accession" = "accession..", "Recent reference" = close.reference) %>% 
+  mutate(Database = c(rep("NCBI", 6),"ENA",rep("NCBI", 4), rep("ENA",3))) %>% 
   relocate(Database, .before = Accession)
 
-pander(sample_table_format, split.table = Inf, table.caption.prefix = "Table 1:", caption = "Species abbreviation codes, genome database, and accession number for each species included in the present study.")
+pander(sample_table_format, split.table = Inf, table.caption.prefix = "Table 1:", caption = "Species abbreviation codes, genome source database, and accession number for each species included in the present study. For all species included in the multiple reference comparison, the final column indicates which species was useds as the recently diverged reference. **Add columns with generation time and reference for each species**")
 
-pander(reference_table_data, split.table = Inf, table.caption.prefix = "Table 2:", caption = "Species abbreviation codes, genome database, and accession number for each species used as a reference genome for alignment in this study.")
+pander(reference_table_data, split.table = Inf, table.caption.prefix = "Table 2:", caption = "Species abbreviation codes, genome source database, and accession number for each species used as a reference genome for alignment in this study.")
 
 ```
 
@@ -87,23 +93,79 @@ pander(reference_table_data, split.table = Inf, table.caption.prefix = "Table 2:
 
 <br>
 
-The short-read alignment script uses samtools, bcftools, bedtools, and bwa commands to align the sample genome to the reference genome and extract variants. Additional filtering steps using Picard’s repeat masking function alongside bedtools removes potential duplicate reads from the variants.
+### Sample alignment {-}
 
-Some of the sample genomes used in this study, however, were not in short-read format, but analyzed using Hi-C techniques, requiring a different script. This script still used samtools, bcftools, and bedtools, as only the steps aligning the reference genome needed to be altered. Instead of bwa, the bwa-mem2 module was instead used in alignment, which required re-indexing of any reference fna files, and the generation of an fai file using samtools faidx. Additionally, this more complicated alignment used external perl scripts to combine reads, as well as Picard for adding read groups (define significance of read groups and combining reads?). Picard is also used similarly to the short-read script in repeat-read masking with bedtools (significance of repeat masking?). The both alignment scripts culminate in a vcf file format, which can then be used in post-alignment processing. The scripts are used for every genome of their respective types and repeated for the multiple references a script may be aligned to.
+All 14 sample genomes were first aligned to the intermediate reference genome, the sperm whale. The alignment pipeline, regardless of sequencing approach, comprised six steps: 1) align sample genome to reference, 2) sort aligned genome, 3) remove duplicate sequences, 4) mask repeat regions, 5) index genome, 6) call genotypes and filter variants by read depth. All alignment scripts can be found at https://github.com/UW-WADE-lab/Whole-Genome-Alignment.
 
-Post-alignment processing entails using the vcf scripts produced to extract the information needed to calculate whole genome mutation rates, as well as other analyses, such as chromosome-level mutation rate. The R script we are using to calculate mutation rate is derived from the Robinson et al. (2022) paper on vaquitas, with modifications made to loop through all the samples used in this study, as only one genome was used in the Robinson paper. This script requires the total number of SNPs, the number of heterozygous variants, the number of homozygous variants, the number of alternate allele variants, the species’ generation time, and the species’ divergence times to calculate mutation rate. The generation and divergence times are obtained externally from (insert examples of sources here?). As previously mentioned, the number of specific types of variants can be obtained from the vcf file format using lines of code created with the awk command. 
+Step 1 differed for Illumina short-read and Dovetail Hi-C sample genomes. We aligned forward and reverse reads from Illumina short-read genomes using bwa (REF). Dovetail Hi-C genomes, which comprise longer reads that are vulnerable to chimeras resulting from hairpin turns (?) (REF), require an additional filtering step post-alignment. Therefore, we aligned Dovetail Hi-C forward and reverse reads separately using bwa-mem2, and filtered forward and reverse read files separately using a custom perl script generated by Arima (REF/website here?) to identify and remove chimeras. We then combined forward and reverse reads using a custom perl script from Arima (REF/website here?).
 
-(insert mutation rate proper equation?)
+Steps 2-6 were identical for both types of sample genome. We sorted genomes using samtools (REF) and removed duplicates using Picard (REF). We masked repeat regions, previously identified using the reference genome, with bedtools (REF). We indexed the sample genome using samtools, called genotypes using bcftools (REF), and filtered variants to remove those with a read depth greater than 500, also using bcftools. Note that this read depth filter is higher than is normally used in an alignment pipeline; this allowed us to directly examine the effect of read depth on mutation rate later in the study. 
+
+We selected seven of the 14 sample genomes for a comparison of mutation rate estimates among reference genomes. These samples were additionally aligned to the hippopotamus and either the killer whale (odontocetes) or the North Atlantic right whale (mysticetes) using the pipeline described above (Table 1).
+
+### Data analysis: calculating mutation rate {-}
+
+Mutation rate ($\mu$) is commonly estimated as genomic divergence (i.e. genomic heterozygosity, $d_{xy}$) over divergence time ($t$):
+
+\begin{equation}
+    \mu=d_{xy}/2t
+\end{equation}
+
+Genomic divergence ($d_{xy}$), in turn, is estimated as:
+
+\begin{equation}
+    d_{xy}=(h_1+2h_2)/2g
+\end{equation}
+
+where $h_1$ is the number of sites in which the sample genome is heterozygous, $h_2$ is the number of sites in which the sample genome is homozygous for the alternate allele, and $g$ is the number of sites in which both the sample and reference genomes had called genotypes.
+
+This calculation may result in an overestimate of mutation rate because ancestral (pre-divergence) heterozygosity is not taken into account, which we can account for in the following:
+
+\begin{equation}
+    \mu=(d_{xy}-\pi_{anc})/2t
+\end{equation}
+
+Because $\pi_{anc}$ is unknown, we used previous estimates of genome-wide heterozygosity from the harbor porpoise, as in Robinson et al. [-@Robinson2022].
+
+Both divergence time ($t$) and ancestral heterozygosity $\pi_{anc}$ have previously been identified as potential sources of variability in downstream estimates of mutation rate. Therefore, we began by comparing estimates of mutation rate with and without ancestral heterozygosity, and using divergence times from McGowen et al. [-@mcgowen_etal20], XXXX., and TimeTree [@kumar_etal17]. We found that mutation rate variability owing to these two parameters was not significant (**TEST THIS, p-value here**) and trivial in comparison to variability caused by other parameters tested in this study (Supplemental Figure S1); therefore, all downstream data analyses used mutation rate estimates without ancestral heterozygosity and with divergence times from McGowen et al. [-@mcgowen_etal20].
+
+The above equations produce a per-site mutation rate estimate, which we further converted to an estimate of mutation rate per site per generation. For most species, generation time was available from Taylor et al. [-@Taylor2007, Table 1].
+
+### Data analysis: phylogenetic or demographic effects on mutation rate {-}
+
+All data analyses were completed in R [@RCoreTeam2016] using Rstudio (REF). All 14 species are included in analyses oh phylogenetic and demographic effects on mutation rate, aligned to the sperm whale reference genome. Using a Shapiro-Wilk normality test [@royston82; @royston82a], we determined that our mutation rate dataset including 14 species aligned to the sperm whale reference are normally distributed (p = `r round(rate_normality$p.value, digits = 2)`), therefore we used ANOVA [@hollander_etal15p] for all tests of mutation rate differentiation among categorical taxonomic strata, and linear regression to test for demographic effects.
+
+To test for an effect of phylogenetic inertia, we test for significant differentiation in whole-genome mutation rate between infraorders and among three families for which we have more than one species. We also consider potential effects of lifespan and body size on whole-genome mutation rate using data on species-specific maximum lifespan from XXXX (REF) and maximum body length from XXX (REF). Because generation time is used in our mutation rate estimates, we do not test for a relationship between this parameter and mutation rate. We first tested for correlation between lifespan and maximum body length and found them to be highly correlated (VALUE HERE); therefore, our linear model included only maximum lifespan as a predictor of whole-genome mutation rate. We tested the distribution of our mutation rate data for normality in order to confirm that a traditional linear relationship could appropriately be used to model our data, and further confirmed model fit by comparing R^2^ values among several models and by visually examining model residuals. Finally, because phylogeny may be a significant driver of mutation rate among species, we compared our linear model with a linear mixed model, setting family as a random effect.
+
+### Data analysis: pipeline effects on mutation rate {-}
+
+Within this study, we consider the effect of the following pipeline variability on downstream estimates of mutation rate:
+
+1. Choice of reference species for genomic alignment
+2. Genomic location of regions used in estimate (i.e. chromosome-level mutation rate variability)
+3. Inclusion of coding vs. non-coding regions in estimate
+4. Maximum read depth cutoff for called genotypes
+
+**Reference species:** As described above, we additionally aligned seven of the fourteen species to a deeply diverged reference (hippopotamus) and a recently diverged reference (North Atlantic right whale or killer whale, see Table 2). We when grouped whole genome mutation rates into three categories: deep divergence, intermediate divergence, and recent divergence, and used an ANOVA analysis to determine whether mutation rate varies significantly among these three groups.
+
+**Chromosome position:** For all fourteen species aligned to the sperm whale reference genome, we extracted SNPs located on each chromosome using a custom bash script and estimated a chromosome-specific mutation rate for each species. We then used a chi-square analysis to determine whether mutation rate varies significantly among chromosomes across all species included in the study.
+
+**Coding vs non-coding regions:** For all fourteen species aligned to the sperm whale reference genome, we extracted SNPs located in coding and non-coding regions by mapping to a bed file generated from annotations of the sperm whale reference genome (available from NCBI Genbank). We then compared mutation rate estimates between coding and non-coding regions of the genome, first across all fourteen species included in the study, and then within the mysticete and the odontocetes.
+
+**Genotype read-depth:** In order to examine effects of genotype read-depth on variabilily in mutation rate estimates, we first generated new genotype vcf files with calls for all loci, including both heterozygous and homozygous loci. Using these vcf files and considering read depths of 10-500 reads, we then used a custom R script to determine the cumulative proportion of heterozygous sites with increasing read depth. Following this, we calculated mutation rate for each species at maximum read depth cutoffs from 100-500. Finally, using a generalized linear mixed model with species as a random effect, we test whether read depth is a significant driver of mutation rate estimates.
+
 
 ## Results {-}
 
-Whole genome mutation rate variability is high among individual species (Figure 1). In addition to inter-specific variability in mutation rate, we found that phylogenetic inertia accounted for a large portion of this variability, i.e. mutation rates were significantly higher in mysticetes than in odontocetes (p = `r format(summary(infraorder_aov)[[1]][1,5], digits = 2)`, Figure X).
+### Phylogenetic or demographic effects on mutation rate
+
+Whole genome mutation rate variability is high among individual species (Figure 1). We found that infraorder accounted for apprxomiately 34% of this variability, with mutation rates that were significantly higher in mysticetes than in odontocetes  (ANOVA p = `r format(summary(infraorder_anova)[[1]][1,5], digits = 2)`, sum-of-square ratio = `r format(summary(infraorder_anova)[[1]][1,2]/(summary(infraorder_anova)[[1]][1,2]+summary(infraorder_anova)[[1]][2,2]), digits = 2)`, Figure 1). However, we did not observe a significant difference in mutation rate among the three families that we were able to test: Balaenopteridae, Delphinidae, and Ziphiidae (ANOVA p = `r format(summary(family_anova)[[1]][1,5], digits = 2)`).
 
 <br>
 
 <br>
 
-```{r whole_genome_rate, fig.align = "center", fig.height = 8, fig.width = 8, fig.cap = "Figure 1. Top: Whole genome mutation rate for each cetacean species included in the study. Bottom: Mean mutation rate for mysticete and odontocete clades. Mutation rates in both subplots were estaimted using Pmac as the reference genome and divergence estimates from McGowen et al. 2020. The dotted line represents an odontocete nuclear mutation rate estimate from Dornburg et al. 2012."}
+```{r whole_genome_rate, fig.align = "center", fig.height = 8, fig.width = 8, fig.cap = "Figure 1. Top: Whole genome mutation rate for each cetacean species included in the study. Bottom: Mean mutation rate for mysticete and odontocete clades. Mutation rates in both subplots were estimated using Pmac as the reference genome and divergence estimates from McGowen et al. 2020. The dotted line represents an odontocete nuclear mutation rate estimate from Dornburg et al. 2012."}
 top <- ggplot(data=whole_mrate_graph, aes(x=abbrev,y=rate)) +
   geom_point(size=3.7) +
   labs(x="Species", y="Mutations/\nsite/generation") +
@@ -113,15 +175,17 @@ top <- ggplot(data=whole_mrate_graph, aes(x=abbrev,y=rate)) +
   theme(plot.margin = unit(c(10,30,0,0), 'pt'), axis.title.y = element_text(margin = margin(t=0,r=12,b=0,l=5)),
         axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0))) +
   scale_shape_discrete(guide="none") +
-  geom_hline(data=est2, mapping=aes(yintercept=yint),linetype="dotdash") +
+  geom_hline(aes(yintercept=1.08e-8, linetype="dotdash")) +
   scale_linetype_discrete(guide="none")
 
-bottom <- ggplot(data=whole_mrate_graph, aes(x=infraorder, y=rate, fill=infraorder)) +
+bottom <- ggplot(data=whole_mrate_graph, aes(x=infraorder, y=rate, fill=infraorder, color = infraorder, alpha = 0.3)) +
   geom_violin() +
   labs(x="Infraorder", y="Mutations/\nsite/generation") +
   theme_light() +
   theme(text = element_text(size = 16)) +
   scale_fill_manual(values=pnw_palette(n=6,name="Cascades")[c(3,6)]) +
+  scale_color_manual(values=pnw_palette(n=6,name="Cascades")[c(3,6)]) +
+  scale_alpha(guide="none") +
   theme(plot.margin = unit(c(10,30,0,0), 'pt'), axis.title.y = element_text(margin = margin(t=0,r=12,b=0,l=5)),
         axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0)), legend.position = "none") +
   geom_dotplot(binaxis = 'y', size=4, fill = "black")
@@ -133,7 +197,11 @@ top / bottom
 
 <br>
 
-The reference genome used affected mutation rate variablity by an order of magnitude in some species (Figure X). Reference genomes for this analysis were chosen to reflect three periods of evolutionary divergence: deep, medium, and shallow. Mutation rate was highest in most species when compared to the deep divergence reference genome, indicating that mutation rate in cetaceans may have been higher in deep evolutionary time than current evolutionary time. Alignment to the middle divergence reference genome resulted in the lowest mutation rate estimates, and alignment to the shallow divergence reference genome resulted in mutation rate estimates that were intermediate between the deep and middle divergence reference genomes.
+We gathered data on three demographic parameters with the potential to affect species-specific mutation rate: maximum lifespan, maximum body length (as a proxy for metabolic rate), and generation time. We first tested the degree of correlation between these three parameters (Supplemental Figure S2). Because body mass and lifespan are highly correlated (correlation = 0.84), we used only lifespan in our linear regression.
+
+### Pipeline effects on mutation rate
+
+The reference genome used affected mutation rate variability by an order of magnitude in some species (Figure X). Reference genomes for this analysis were chosen to reflect three periods of evolutionary divergence: deep, medium, and shallow. Mutation rate was highest in most species when compared to the deep divergence reference genome, indicating that mutation rate in cetaceans may have been higher in deep evolutionary time than current evolutionary time. Alignment to the middle divergence reference genome resulted in the lowest mutation rate estimates, and alignment to the shallow divergence reference genome resulted in mutation rate estimates that were intermediate between the deep and middle divergence reference genomes.
 
 <br>
 
@@ -151,7 +219,7 @@ top <- ggplot(data=mult_refs_graph, aes(x=abbrev,y=rate,shape=div_est,color=ref_
   scale_shape_discrete(guide="none") +
   scale_color_manual(values=pnw_palette(n=3,name="Sunset2"), 
                      name="Reference Distance") +
-  geom_hline(data=est2, mapping=aes(yintercept=yint),linetype="dotdash")
+  geom_hline(aes(yintercept=1.08e-8, linetype="dotdash"))
   
   
 bottom <- mult_refs_graph %>% 

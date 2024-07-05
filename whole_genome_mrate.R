@@ -4,12 +4,12 @@
 ###############################################################################
 
 library(tidyverse)
-
-setwd("C:/Users/Intern/Downloads")
+library(ggpubr)
+library(PNWColors)
 
 # get genome metadata and table data--------------------------------------------
 
-genome_metadata <- read.csv("R_script_info_mrate.csv")
+genome_metadata <- read.csv("genome_metadata.csv")
 sample_table_data <- read.csv("sample_info_table.csv")
 reference_table_data <- read.csv("reference_info_table.csv")
 
@@ -38,76 +38,134 @@ for (i in 1:nrow(data_files)) {
   # alleles)
   DIV=(HET+(2*HOMALT))/(2*TOTAL)
   
-  #Time to coalesence
+  #Generations to coalesence
   T_TT=data_files$div_timetree[i]/data_files$gen_time[i]
   T_McG=data_files$div_mcgowen2020[i]/data_files$gen_time[i]
   T_LL=data_files$div_lloyd2021[i]/data_files$gen_time[i]
   
-  #noPi mutation rate
-  noPI_TT <- DIV/(2*T_TT)
-  noPI_McG <- DIV/(2*T_McG)
-  noPI_LL <- DIV/(2*T_LL)
+  #noPi mutation rate per generation
+  noPI_TTgen <- DIV/(2*T_TT)
+  noPI_McGgen <- DIV/(2*T_McG)
+  noPI_LLgen <- DIV/(2*T_LL)
   
-  #Pi mutation rate
-  #PI_mutation <- (DIV-PI)/(2*T_TT)
+  #Pi mutation rate per generation
+  PI_TTgen <- (DIV-PI)/(2*T_TT)
+  PI_McGgen <- (DIV-PI)/(2*T_McG)
+  PI_LLgen <- (DIV-PI)/(2*T_LL)
+  
+  #noPi mutation rate per year
+  noPI_TTyear <- DIV/(2*data_files$div_timetree[i])
+  noPI_McGyear <- DIV/(2*data_files$div_mcgowen2020[i])
+  noPI_LLyear <- DIV/(2*data_files$div_lloyd2021[i])
+  
+  #Pi mutation rate per year
+  PI_TTyear <- (DIV-PI)/(2*data_files$div_timetree[i])
+  PI_McGyear <- (DIV-PI)/(2*data_files$div_mcgowen2020[i])
+  PI_LLyear <- (DIV-PI)/(2*data_files$div_lloyd2021[i])
   
   temp_wga_data <- data.frame(species = rep(data_files$species[i],3),
                               abbrev = rep(data_files$abbrev[i],3),
-                              #method = c("noPI","noPI","noPI","PI"), 
-                              div_est = c("timetree","McGowan","Lloyd"),
-                              rate = c(noPI_TT, noPI_McG, noPI_LL), 
+                              Pimethod = c(rep("noPI",6),rep("PI",6)), 
+                              time_step = c(rep("gen",3),rep("year",3),
+                                            rep("gen",3),rep("year",3)),
+                              div_est = rep(c("timetree","McGowan","Lloyd"),4),
+                              rate = c(noPI_TTgen, noPI_McGgen, noPI_LLgen,
+                                       noPI_TTyear, noPI_McGyear, noPI_LLyear,
+                                       PI_TTgen, PI_McGgen, PI_LLgen,
+                                       PI_TTyear, PI_McGyear, PI_LLyear), 
                               reference = rep(data_files$reference[i],3))
   
   whole_mrate_data <- rbind(whole_mrate_data, temp_wga_data)
 }
 
-library(ggplot2)
-library(PNWColors) #color palette library
-
 ###DATA FRAMES###---------------------------------------------------------------
-# data frame for estimations of mutation rate-----------------------------------
-whole_mrate_graph <- whole_mrate_data %>% left_join(data_files, by = c("abbrev", "reference", "species")) %>% 
+#mutation rate by species per generation----------------------------------------
+species_mrate_gen <- whole_mrate_data %>% left_join(data_files, by = c("abbrev", "reference", "species")) %>% 
   filter(reference == "Pmac") %>% 
-  filter(div_est == "McGowan")
+  filter(div_est == "McGowan") %>% 
+  filter(time_step == "gen") %>% 
+  filter(Pimethod == "noPI")
 
-# data frame for previous mutation rate estimates-------------------------------
-est2 <- data.frame(yint=1.08e-8)
+#mutation rate by species per year----------------------------------------
+species_mrate_year <- whole_mrate_data %>% left_join(data_files, by = c("abbrev", "reference", "species")) %>% 
+  filter(reference == "Pmac") %>% 
+  filter(div_est == "McGowan") %>% 
+  filter(time_step == "year") %>% 
+  filter(Pimethod == "noPI")
 
-#dataframe for mutation rates of multiple references----------------------------
-mult_refs_graph <- whole_mrate_data %>% group_by(species) %>% 
-  filter(n()>3) %>% ungroup() %>%
+#mutation rate by species per generation w multiple references------------------
+mult_refs_gen <- whole_mrate_data %>% group_by(species) %>% 
+  filter(n()>12) %>% ungroup() %>%
   filter(div_est == "McGowan") %>%
-  mutate(ref_dist = reference) 
+  filter(time_step == "gen") %>% 
+  filter(Pimethod == "noPI") %>% 
+  mutate(ref_dist = case_when(reference == "Pmac" ~ "Middle",
+                              reference %in% c("Egla","Oorc") ~ "Close",
+                              reference == "Hamb" ~ "Far",
+                              TRUE ~ NA))
 
-mult_refs_graph$ref_dist[mult_refs_graph$ref_dist == 'Pmac'] <- 'Middle'
-mult_refs_graph$ref_dist[mult_refs_graph$ref_dist == 'Egla'] <- 'Close'
-mult_refs_graph$ref_dist[mult_refs_graph$ref_dist == 'Oorc'] <- 'Close'
-mult_refs_graph$ref_dist[mult_refs_graph$ref_dist == 'Hamb'] <- 'Far'
+#test whether mutation rate is normally distributed
+# all species, one reference, mutation/gen
+hist(species_mrate_gen$rate)
+ggqqplot(species_mrate_gen$rate)
 
-#anova for infraorder
-infraorder_aov <- aov(rate ~ infraorder, data = whole_mrate_graph)
-infraorder_aov
+rate_normality <- shapiro.test(species_mrate_gen$rate)
+rate_normality
+
+# multi-ref species, mutation/gen
+hist(mult_refs_gen$rate)
+ggqqplot(mult_refs_gen$rate)
+
+ref_normality <- shapiro.test(mult_refs_gen$rate)
+ref_normality
+
+#is mutation rate significantly different among infraorder or family?
+infraorder_anova <- aov(rate ~ infraorder, data = species_mrate_gen)
+summary(infraorder_anova)
+
+family_data <- species_mrate_gen %>% 
+  group_by(family) %>% 
+  filter(n() > 1)
+
+family_anova <- aov(rate ~ family, data = family_data)
+summary(family_anova)
+
+two_family_data <- family_data %>% 
+  filter(family != "Delphinidae")
+
+two_family_anova <- aov(rate ~ family, data = two_family_data)
+summary(two_family_anova)
+
+#is mutation rate significantly different among references?
+reference_anova <- aov(rate ~ ref_dist, data = mult_refs_gen)
+summary(reference_anova)
+
+reference_anova_sp <- aov(rate ~ reference, data = mult_refs_gen)
+summary(reference_anova_sp)
+
+reference_anova_near <- aov(rate ~ reference, data = mult_refs_gen %>% filter(ref_dist=="Close"))
+summary(reference_anova_near)
 
 ###PLOTS####--------------------------------------------------------------------
 #plot for whole mutation rate for only sperm whale refs-------------------------
-ggplot(data=whole_mrate_graph, aes(x=abbrev,y=rate,shape=div_est,color=species)) +
+ggplot(data=species_mrate_gen, aes(x=abbrev,y=rate,shape=div_est,color=species)) +
   geom_point(size=3.7) +
   labs(x="Species", y="Mutations/site/generation",
        title="Whole Genome Mutation Rate", 
        subtitle = "Aligned to a sperm whale reference genome with the McGowan et al (2020)\ndivergence estimates") +
   theme_light() +
   theme(text = element_text(size = 20), plot.subtitle = element_text(size = 14)) +
-  guides(color=FALSE) +
+  guides(color="none") +
   theme(plot.margin = unit(c(10,30,0,0), 'pt'), axis.title.y = element_text(margin = margin(t=0,r=12,b=0,l=5)),
         axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0))) +
   scale_shape_discrete(guide="none") +
   scale_color_manual(values=pnw_palette(n=14,name="Sunset2")) +
-  geom_hline(data=est2, mapping=aes(yintercept=yint, linetype="B")) +
+  geom_hline(aes(yintercept=1.08e-8, linetype="B")) +
   scale_linetype_discrete(labels=c('Odontocete nuclear\nmutation rate\n(Dornburg et al. 2012)'), 
                           name="Estimates")
 
 #plot for mutation rates of multiple references---------------------------------
-ggplot(data=mult_refs_graph, aes(x=species,y=rate,shape=div_est,color=ref_dist)) +
+ggplot(data=mult_refs_gen, aes(x=species,y=rate,shape=div_est,color=ref_dist)) +
   geom_point(size=3.7) +
   labs(x="Species", y="Mutations/site/generation",
        title="Whole Genome Mutation Rate",
@@ -119,16 +177,30 @@ ggplot(data=mult_refs_graph, aes(x=species,y=rate,shape=div_est,color=ref_dist))
   scale_shape_discrete(name="Divergence Date Estimate") +
   scale_color_manual(values=pnw_palette(n=3,name="Sunset2"), 
                      name="Reference Distance") +
-  geom_hline(data=est2, mapping=aes(yintercept=yint, linetype="B")) +
+  geom_hline(aes(yintercept=1.08e-8, linetype="B")) +
   scale_linetype_discrete(labels=c('Odontocete nuclear\nmutation rate\n(Dornburg et al. 2012)'), 
                           name="Estimates")
 
 #plot for rate by lifespan (only Pmac refs)-------------------------------------
 #linear plot
-ggplot(data=whole_mrate_graph, aes(x=lifespan,y=rate)) +
+ggplot(data=species_mrate_year, aes(x=lifespan,y=rate)) +
   geom_point(aes(color=factor(infraorder)), size=3.7) +
-  labs(x="Lifespan", y="Mutations/site/generation",
+  labs(x="Lifespan", y="Mutations/site/year",
        title="Whole Genome Mutation Rate by Lifespan") +
+  theme_light() +
+  theme(text = element_text(size = 20)) +
+  theme(plot.margin = unit(c(10,30,0,0), 'pt'), axis.title.y = element_text(margin = margin(t=0,r=12,b=0,l=5)),
+        axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0))) +
+  scale_color_manual(values=pnw_palette(n=2,name="Sunset2"),
+                     name = "Infraorder") +
+  geom_smooth(method = "lm", color = "black", size = 0.75, alpha = 0.20)
+
+#plot for rate by generation time (only Pmac refs)-------------------------------------
+#linear plot
+ggplot(data=species_mrate_year, aes(x=gen_time,y=rate)) +
+  geom_point(aes(color=factor(infraorder)), size=3.7) +
+  labs(x="Lifespan", y="Mutations/site/year",
+       title="Whole Genome Mutation Rate by Generation Time") +
   theme_light() +
   theme(text = element_text(size = 20)) +
   theme(plot.margin = unit(c(10,30,0,0), 'pt'), axis.title.y = element_text(margin = margin(t=0,r=12,b=0,l=5)),
@@ -139,9 +211,9 @@ ggplot(data=whole_mrate_graph, aes(x=lifespan,y=rate)) +
 
 #violin of mysticetes v. odontocete whole mutation rates (only Pmac refs)-------
 
-ggplot(data=whole_mrate_graph, aes(x=infraorder, y=rate)) +
+ggplot(data=species_mrate_year, aes(x=infraorder, y=rate)) +
   geom_violin() +
-  labs(x="Infraorder", y="Mutations/site/generation",
+  labs(x="Infraorder", y="Mutations/site/year",
        title="Whole Genome Mutation Rate by Infraorder") +
   theme_light() +
   theme(text = element_text(size = 20)) +
@@ -150,9 +222,22 @@ ggplot(data=whole_mrate_graph, aes(x=infraorder, y=rate)) +
   scale_fill_manual(values=pnw_palette(n=2, name="Sunset2")) +
   geom_point(size=2.7, alpha=0.75)
 
+#violin of whole mutation rates by family (only Pmac refs)----------------------
+
+ggplot(data=family_data, aes(x=family, y=rate)) +
+  geom_violin(aes(fill=family), color = NA, linewidth=0, alpha = 0.5) +
+  labs(x="Family", y="Mutations/site/generation",
+       title="Whole Genome Mutation Rate by Infraorder") +
+  theme_light() +
+  theme(text = element_text(size = 20)) +
+  theme(plot.margin = unit(c(10,30,0,0), 'pt'), axis.title.y = element_text(margin = margin(t=0,r=12,b=0,l=5)),
+        axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0))) +
+  scale_fill_manual(values=pnw_palette(n=3, name="Sunset2")) +
+  geom_point(size=3, alpha=0.9,aes(color=species))
+
 #violin of different reference genome whole mutation rates---------------------
 
-ggplot(data=mult_refs_graph, aes(x=reference, y=rate)) +
+ggplot(data=mult_refs_gen, aes(x=reference, y=rate)) +
   geom_violin() +
   labs(x="Reference", y="Mutations/site/generation",
        title="Whole Genome Mutation Rate by Reference") +
@@ -163,5 +248,8 @@ ggplot(data=mult_refs_graph, aes(x=reference, y=rate)) +
   geom_point(size=2.7, alpha=0.75)
 
 #save dataframes
-save(whole_mrate_graph, whole_mrate_data, mult_refs_graph, est2, infraorder_aov, sample_table_data, reference_table_data, file = "C:/Users/Intern/Downloads/Mutation-rate-variability-in-cetaceans/whole_mutation_rate_df.Rdata")
+save(species_mrate_gen, species_mrate_year, whole_mrate_data, mult_refs_gen, 
+     sample_table_data, reference_table_data, rate_normality, ref_normality, reference_anova,
+     infraorder_anova, family_anova, reference_anova_near, reference_anova_sp,
+     file = "whole_mutation_rate_df.Rdata")
 
