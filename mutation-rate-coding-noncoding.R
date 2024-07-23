@@ -101,7 +101,6 @@ combined_data <- bind_rows(pcoding_data, noncoding_data) %>%
 
 code_noncode_data <- data.frame()
 
-# loop that iterates through mutation rate calculation w/ info from each row
 for (i in 1:nrow(combined_data)) {
   AALLELE=combined_data$aallele[i]
   TOTAL=combined_data$tot.length[i] - AALLELE
@@ -116,8 +115,8 @@ for (i in 1:nrow(combined_data)) {
   # alleles)
   DIV=(HET+(2*HOMALT))/(2*TOTAL)
   
-  #Time to coalesence
-  T=combined_data$div_mcgowen2020[i]/combined_data$gen_time[i]
+  #Time to coalesence in years
+  T=combined_data$div_mcgowen2020[i]
   
   #noPi mutation rate
   noPI_mutation <- DIV/(2*T)
@@ -140,16 +139,26 @@ code_noncode_data <- code_noncode_data %>%
 
 #### Test for differentiation in rates in coding and non-coding regions --------
 
-code_noncode_aov <- code_noncode_data %>% 
-  #filter(method == "PI") %>% 
+code_noncode_aov <- aov(rate ~ snp_type, data = code_noncode_data %>% 
+                          filter(method == "noPI"))
+summary(code_noncode_aov)
+
+order_code_noncode_aov <- code_noncode_data %>% 
+  filter(method == "noPI") %>% 
   group_by(suborder) %>% 
   tidyr::nest() %>%
   dplyr::mutate(.data = .,
                 aov_results = data %>% purrr::map(.x = ., .f = ~ summary(aov(rate ~ snp_type, data = .))))
 
-myst_coding_aov <- code_noncode_aov$aov_results[[1]]
-odon_coding_aov <- code_noncode_aov$aov_results[[2]]
-## graph time!
+myst_coding_aov <- order_code_noncode_aov$aov_results[[1]]
+odon_coding_aov <- order_code_noncode_aov$aov_results[[2]]
+
+coding_difference <- code_noncode_data %>% 
+  filter(method == "noPI") %>% 
+  pivot_wider(names_from = "snp_type", values_from = "rate") %>% 
+  mutate(diff_rate = coding-noncoding)
+  
+#### graph time! ---------------------------------------------------------------
 library(ggplot2)
 library(PNWColors)
 
@@ -186,4 +195,4 @@ ggplot(data=code_noncode_data, aes(x=suborder,y=rate,fill=snp_type)) +
         axis.title.x = element_text(margin = margin(t=8,r=0,b=5,l=0))) +
   theme(text = element_text(size = 20))
 
-save(code_noncode_data, odon_coding_aov, myst_coding_aov, file = "G:/My Drive/07 Mutation rate variability/Mutation-rate-variability-in-cetaceans/Mutation-rate-coding-noncoding.Rdata")
+save(coding_difference, code_noncode_aov, code_noncode_data, odon_coding_aov, myst_coding_aov, file = "G:/My Drive/07 Mutation rate variability/Mutation-rate-variability-in-cetaceans/Mutation-rate-coding-noncoding.Rdata")
