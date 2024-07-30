@@ -10,7 +10,10 @@ library(PNWColors)
 #### Load genome metadata, reference metadata, and cetacean heterozygosity -----
 
 genome_metadata <- read.csv("genome_metadata.csv")
-sample_table_data <- read.csv("sample_info_table.csv")
+sample_table_data <- read.csv("sample_info_table.csv") %>% 
+  left_join(genome_metadata %>% select(abbrev, gen_time, length_m, lifespan) %>% group_by(abbrev)
+            %>% slice_head() %>% ungroup,
+            by = c("abbreviation" = "abbrev"))
 reference_table_data <- read.csv("reference_info_table.csv")
 cet_het <- read.csv("cetacean_genome_heterozygosity.csv") %>% 
   dplyr::select(Species, Observed_pi)
@@ -109,21 +112,53 @@ pi_test_data <- whole_mrate_data %>%
   filter(div_est == "McG") %>% 
   filter(reference == "Pmac") %>% 
   filter(time_step == "year")
-  
-pi_anova <- aov(rate ~ Pimethod, data = pi_test_data)
-summary(pi_anova)
 
+pi_normality <- shapiro.test(pi_test_data$rate)
+pi_normality
 
-ggplot(data = pi_test_data, aes(x=Pimethod, y=rate, fill = Pimethod, color = Pimethod, alpha = 0.6)) +
-  geom_violin() +
+pi_kw <- kruskal.test(rate ~ Pimethod, data = pi_test_data)
+pi_kw
+
+pi_test_nomax <- pi_test_data %>% 
+  filter(Pimethod != "PIsummax")
+
+# post doc dunn test
+pi_dunn <- data.frame(dunn.test(pi_test_data$rate, pi_test_data$Pimethod,
+                                   method = "bonferroni")) %>% 
+  filter(P.adjusted < 0.05) %>% 
+  separate(comparisons, into = c("pi1", "pi2"), sep = " - ")
+
+pi_dunn_diff1 <- pi_dunn %>% 
+  group_by(pi1) %>% 
+  summarise(n_sig1 = n())
+
+pi_dunn_diff <- pi_dunn %>% 
+  group_by(pi2) %>% 
+  summarise(n_sig2 = n()) %>% 
+  full_join(pi_dunn_diff1, by = c("pi2" = "pi1")) %>% 
+  mutate(across(c(n_sig1,n_sig2), 
+                ~ case_when(is.na(.) ~ 0, TRUE ~ .))) %>% 
+  mutate(tot_sig = n_sig1 + n_sig2) %>% 
+  filter(tot_sig > 2) %>% 
+  mutate(y = 2.1e-10)
+
+ggplot(data = pi_test_data) +
+  geom_violin(aes(x=Pimethod, y=rate, fill = Pimethod, color = Pimethod), alpha = 0.6) +
+  geom_point(pi_dunn_diff, mapping = aes(x=pi2, y = y), shape = 8, size = 1.5, stroke = 1.1, color = "indianred3") +
   theme_light() +
+  labs(x= expression(paste(pi[anc], " correction method")), y="Mutations/site/year") +
   theme(text = element_text(size = 20)) +
   scale_fill_manual(values=pnw_palette(n=5, name="Shuksan")) +
   scale_color_manual(values=pnw_palette(n=5, name="Shuksan")) +
   scale_alpha(guide="none") +
-  geom_dotplot(binaxis = 'y', fill = "black", color ="black", alpha = 0.5, stackdir = "center") +
+  geom_dotplot(aes(x=Pimethod, y=rate), binaxis = 'y', fill = "black", color ="black", alpha = 0.5, stackdir = "center") +
   theme(plot.margin = unit(c(10,30,0,0), 'pt'), axis.title.y = element_text(margin = margin(t=0,r=12,b=0,l=5)),
-        axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0)), legend.position = "none")
+        axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0)), legend.position = "none") +
+  scale_x_discrete(labels = c("noPI" = expression(paste("no ",pi)), 
+                              "PI" = expression(paste("species ",pi)), 
+                              "PIsummax" = expression(paste("max ",pi)), 
+                              "PIsummean" = expression(paste("mean ", pi)), 
+                              "PIsummin" = expression(paste("min ", pi))))
   
 #### Test for effect of divergence date ----------------------------------------
 
@@ -132,8 +167,11 @@ div_test_data <- whole_mrate_data %>%
   filter(time_step == "year") %>% 
   filter(Pimethod == "noPI")
 
+div_normality <- shapiro.test(div_test_data$rate)
+div_normality
+
 div_anova <- aov(rate ~ div_est, data = div_test_data)
-summary(pi_anova)
+summary(div_anova)
 
 ggplot(data = div_test_data, aes(x=div_est, y=rate, fill = div_est, color = div_est, alpha = 0.6)) +
   geom_hline(aes(yintercept=2.2e-10), linetype= "dotdash") +
@@ -206,12 +244,12 @@ mult_refs <- whole_mrate_data %>%
                               TRUE ~ NA))
 
 #test whether mutation rate is normally distributed
-# all species, one reference, mutation/gen
-hist(species_mrate_gen$rate)
-ggqqplot(species_mrate_gen$rate)
+# all species, one reference, mutation/year
+hist(species_mrate_year$rate)
+ggqqplot(species_mrate_year$rate)
 
-rate_normality <- shapiro.test(species_mrate_gen$rate)
-rate_normality
+species_rate_normality <- shapiro.test(species_mrate_year$rate)
+species_rate_normality
 
 # multi-ref species, mutation/gen
 hist(mult_refs_gen$rate)
@@ -248,6 +286,11 @@ family_data_gen <- species_mrate_gen %>%
 
 family_anova_gen <- aov(rate ~ family, data = family_data_gen)
 summary(family_anova_gen)
+
+#what is the range in mutation rate variability among species?
+
+species_rate_range <- species_mrate_year %>% 
+  summarise(ratediff = max(rate) - min(rate))
 
 #is mutation rate significantly different among references?
 reference_anova <- aov(rate ~ ref_dist, data = mult_refs_year)
@@ -363,10 +406,10 @@ ggplot(data=mult_refs_gen, aes(x=reference, y=rate)) +
 
 #save dataframes
 save(species_mrate_gen, species_mrate_year, whole_mrate_data, mult_refs_gen, 
-     sample_table_data, reference_table_data, rate_normality, ref_normality, reference_anova,
-     infraorder_anova, family_anova, reference_anova_near, reference_anova_sp, reference_anova_far, 
-     mult_refs, mult_refs_year, div_anova, div_test_data, pi_anova, pi_test_data, family_data, family_data_gen,
+     sample_table_data, reference_table_data, species_rate_normality, ref_normality, reference_anova,
+     family_anova, reference_anova_near, reference_anova_sp, reference_anova_far, 
+     mult_refs, mult_refs_year, div_anova, div_test_data, pi_kw, pi_dunn_diff, pi_test_data, family_data, family_data_gen,
      infraorder_anova_year, infraorder_anova_gen, infraorder_anova_gen_sub, infraorder_anova_year_sub,
-     family_anova_gen, het_summary,
+     family_anova_gen, het_summary, pi_normality, div_normality,species_rate_range, pi_test_nomax,
      file = "whole_mutation_rate_df.Rdata")
 

@@ -5,22 +5,19 @@
 
 library(tidyverse)
 
-setwd("G:/My Drive/00 UW/00.5 W.A.D.E. lab resources/Intern Projects/Mutation rate variability")
-
 # get metadata
-genome_metadata <- read.csv("05 metadata/genome_metadata.csv") %>% 
-  select(-X) %>% 
+genome_metadata <- read.csv("genome_metadata.csv") %>% 
   filter(reference == "Pmac")
 
 #### Get Pmac chromosome names -------------------------------------------------
 
-pmac_chrom <- read.delim("05 metadata/Pmac_sequence_report.tsv", sep = "\t") %>% 
+pmac_chrom <- read.delim("G:/My Drive/00 UW/00.5 W.A.D.E. lab resources/Intern Projects/Mutation rate variability/05 metadata/Pmac_sequence_report.tsv", sep = "\t") %>% 
   select(Chromosome.name, RefSeq.seq.accession) %>% 
   filter(Chromosome.name != "Un")
 
 #### Create BED file for coding regions ----------------------------------------
 
-pmac_code <- read.delim("06 coding_noncoding_snps/Pmac_protein_coding_regions.tsv", sep = "\t") %>% 
+pmac_code <- read.delim("G:/My Drive/00 UW/00.5 W.A.D.E. lab resources/Intern Projects/Mutation rate variability/06 coding_noncoding_snps/Pmac_protein_coding_regions.tsv", sep = "\t") %>% 
   select(Chromosome, Begin, End, Name) %>% 
   filter(Chromosome != "MT") %>% 
   filter(Chromosome != "") %>% 
@@ -40,7 +37,7 @@ code_length <- pmac_code %>%
 
 #### Create BED file for non-coding regions ------------------------------------
 
-pmac_noncode <- read.delim("06 coding_noncoding_snps/Pmac_non_coding_regions.tsv", sep = "\t") %>% 
+pmac_noncode <- read.delim("G:/My Drive/00 UW/00.5 W.A.D.E. lab resources/Intern Projects/Mutation rate variability/06 coding_noncoding_snps/Pmac_non_coding_regions.tsv", sep = "\t") %>% 
   select(Accession, Chromosome, Begin, End, Name) %>% 
   filter(Chromosome != "MT") %>% 
   filter(Chromosome != "") %>% 
@@ -70,10 +67,10 @@ noncode_length <- pmac_noncode %>%
 
 #### Read in txt files with number of SNPs in coding and noncoding regions -----
 
-coding_data_files <- list.files(path = "06 coding_noncoding_snps/",
+coding_data_files <- list.files(path = "G:/My Drive/00 UW/00.5 W.A.D.E. lab resources/Intern Projects/Mutation rate variability/06 coding_noncoding_snps/",
                                 pattern = "_coding_snps.txt")
 
-pcoding_data <- do.call(rbind, lapply(paste0("06 coding_noncoding_snps/", coding_data_files), 
+pcoding_data <- do.call(rbind, lapply(paste0("G:/My Drive/00 UW/00.5 W.A.D.E. lab resources/Intern Projects/Mutation rate variability/06 coding_noncoding_snps/", coding_data_files), 
                                      read.delim, sep=" ", 
                                      header = FALSE, 
                                      col.names = c("hets","homs","aallele"))) %>% 
@@ -82,10 +79,10 @@ pcoding_data <- do.call(rbind, lapply(paste0("06 coding_noncoding_snps/", coding
   mutate(tot.length = code_length) %>% 
   mutate(snp_type = "coding")
 
-noncoding_data_files <- list.files(path = "06 coding_noncoding_snps/",
+noncoding_data_files <- list.files(path = "G:/My Drive/00 UW/00.5 W.A.D.E. lab resources/Intern Projects/Mutation rate variability/06 coding_noncoding_snps/",
                                    pattern = "noncoding_snps.txt")
 
-noncoding_data <- do.call(rbind, lapply(paste0("06 coding_noncoding_snps/", noncoding_data_files), 
+noncoding_data <- do.call(rbind, lapply(paste0("G:/My Drive/00 UW/00.5 W.A.D.E. lab resources/Intern Projects/Mutation rate variability/06 coding_noncoding_snps/", noncoding_data_files), 
                                       read.delim, sep=" ", 
                                       header = FALSE, 
                                       col.names = c("hets","homs","aallele"))) %>% 
@@ -139,9 +136,13 @@ code_noncode_data <- code_noncode_data %>%
 
 #### Test for differentiation in rates in coding and non-coding regions --------
 
+coding_normality <- shapiro.test(code_noncode_data$rate)
+
 code_noncode_aov <- aov(rate ~ snp_type, data = code_noncode_data %>% 
                           filter(method == "noPI"))
 summary(code_noncode_aov)
+
+eta_squared(code_noncode_aov, partial = FALSE)
 
 order_code_noncode_aov <- code_noncode_data %>% 
   filter(method == "noPI") %>% 

@@ -9,13 +9,14 @@
 ################################################################################
 
 library(tidyverse)
-
-setwd("M:/Mutation_Rate")
+library(PNWColors)
+library(viridis)
+library(dunn.test)
 
 ### Get Pmac chromosome length -------------------------------------------------
 
 #create length column
-chromfile <- read.delim("Vcf_mutation/Pmac_chrom_total.txt", col.names = "filename", header = FALSE)
+chromfile <- read.delim("Pmac_chrom_total.txt", col.names = "filename", header = FALSE)
 
 chrom.length <- chromfile %>%
   separate(filename, into = c(NA, "length"), sep = ",") %>%
@@ -26,30 +27,34 @@ chrom.length <- chromfile %>%
 
 ### Get genome metadata --------------------------------------------------------
 
-genome_metadata <- read.csv("R_script_info_mrate.csv")
+genome_metadata <- read.csv("genome_metadata.csv")
 
 ### Create data frame from all text files --------------------------------------
 
-# accessing processed files containing SNPs partitioned by chromosome
-data_files <- list.files("Vcf_mutation", pattern = "chrom_count.txt")
+chrom_snp_data <- read.csv("SNPs_by_chromosome.csv")
 
-# Read the files in, add Pmac chrom.length
-data_files_list <- lapply(paste0("Vcf_mutation/",data_files), 
-                          function(x) {read.delim(file = x, header = FALSE, sep =" ") %>% 
-                          dplyr::rename("abbrev" = 1, "reference" = 2, "hets" = 3, 
-                          "hom" = 4, "aallele" = 5)} %>% cbind(chrom.length))
+# # accessing processed files containing SNPs partitioned by chromosome
+# data_files <- list.files("M:/Mutation_Rate/Vcf_mutation", pattern = "chrom_count.txt")
+# 
+# # Read the files in, add Pmac chrom.length
+# data_files_list <- lapply(paste0("M:/Mutation_Rate/Vcf_mutation/",data_files),
+#                           function(x) {read.delim(file = x, header = FALSE, sep =" ") %>%
+#                           dplyr::rename("abbrev" = 1, "reference" = 2, "hets" = 3,
+#                           "hom" = 4, "aallele" = 5)} %>% cbind(chrom.length))
+# 
+# # Combine them
+# chrom_snp_data <- do.call("rbind", lapply(data_files_list, as.data.frame))
+# 
+# # add info for mutation rate calculations from csv file
+# chrom_snp_data <- chrom_snp_data %>%
+#   left_join(genome_metadata, by = c("abbrev", "reference"))
+# 
+# # save as a csv for later use
+# write.csv(chrom_snp_data, file = "SNPs_by_chromosome.csv", row.names=FALSE)
 
-# Combine them
-chrom_snp_data <- do.call("rbind", lapply(data_files_list, as.data.frame)) 
-
-# add info for mutation rate calculations from csv file
-chrom_snp_data <- chrom_snp_data %>% 
-  left_join(genome_metadata, by = c("abbrev", "reference"))
-
-#data frame for chromosome mutation rates---------------------------------------
+# Calculate chromosome mutation rates ------------------------------------------
 species_chrom_mutation_data <- data.frame()
 
-### loop that iterates through mutation rate calculation w/ info from each row 
   for (i in 1:nrow(chrom_snp_data)) {
     AALLELE=chrom_snp_data$aallele[i]
     TOTAL=chrom_snp_data$length[i] - AALLELE
@@ -60,23 +65,31 @@ species_chrom_mutation_data <- data.frame()
     # Heterozygosity
     PI=HET/TOTAL
     
-    # Divergence (number of alt alleles in hets and hom. alt divided by the total number of 
+# Divergence (number of alt alleles in hets and hom. alt divided by the total number of 
     # alleles)
     DIV=(HET+(2*HOMALT))/(2*TOTAL)
     
     #Time to coalesence
-    T=chrom_snp_data$div_timetree[i]/chrom_snp_data$gen_time[i]
+    T=chrom_snp_data$div_mcgowen2020[i]/chrom_snp_data$gen_time[i]
     
-    #noPi mutation rate
+    #noPi mutation rate in generations
     noPI_mutation <- DIV/(2*T)
     
-    #Pi mutation rate
+    #Pi mutation rate in generations
     PI_mutation <- (DIV-PI)/(2*T)
     
-    temp_chrom_data <- data.frame(species = rep(chrom_snp_data$abbrev[i],2), 
-                                  chrom = rep(chrom_snp_data$chrom.num[i],2), 
-                                  method = c("noPI","PI"), 
-                                  rate = c(noPI_mutation, PI_mutation))
+    #noPi mutation rate in years
+    noPI_mutation_years <- DIV/(2*chrom_snp_data$div_mcgowen2020[i])
+    
+    #Pi mutation rate in years
+    PI_mutation_years <- (DIV-PI)/(2*chrom_snp_data$div_mcgowen2020[i])
+    
+    temp_chrom_data <- data.frame(species = chrom_snp_data$abbrev[i], 
+                                  chrom = chrom_snp_data$chrom.num[i], 
+                                  method = c("noPI","PI","noPI","PI"), 
+                                  time_step = c("gen","gen","year","year"),
+                                  rate = c(noPI_mutation, PI_mutation,
+                                           noPI_mutation_years, PI_mutation_years))
                                   
     species_chrom_mutation_data <- rbind(species_chrom_mutation_data, temp_chrom_data)
   }
@@ -87,40 +100,68 @@ species_chrom_mutation_data <- data.frame()
 species_chrom_mutation_data$chrom <- factor(species_chrom_mutation_data$chrom, 
                                             levels=c("1","2","3","4","5","6","7","8","9","10","11",
                                                      "12","13","14","15","16","17","18","19","20","X"))
+# Filter to include noPi and annual mutation rate only
+
+mrate_by_chrom <- species_chrom_mutation_data %>% 
+  filter(method == "noPI") %>% 
+  filter(time_step == "year")
+
+# test for normality
+chrom_normality <- shapiro.test(mrate_by_chrom$rate)
+#p-value = 2.466e-06
+# not normally distributed
+hist(mrate_by_chrom$rate)
+
+# KW test for differentiation
+kw_chrom <- kruskal.test(rate~chrom, data = mrate_by_chrom)
+
+mrate_by_chrom %>% kruskal_effsize(rate~chrom) %>% pull(effsize)
+
+# post doc dunn test
+chrom_dunn <- data.frame(dunn.test(mrate_by_chrom$rate, mrate_by_chrom$chrom,
+          method = "bonferroni")) %>% 
+  filter(P.adjusted < 0.05) %>% 
+  separate(comparisons, into = c("chrom1", "chrom2"), sep = " - ")
+  
+
+chrom_dunn_diff1 <- chrom_dunn %>% 
+  group_by(chrom1) %>% 
+  summarise(n_sig1 = n())
+
+chrom_dunn_diff <- chrom_dunn %>% 
+  group_by(chrom2) %>% 
+  summarise(n_sig2 = n()) %>% 
+  full_join(chrom_dunn_diff1, by = c("chrom2" = "chrom1")) %>% 
+  mutate(across(c(n_sig1,n_sig2), 
+                ~ case_when(is.na(.) ~ 0, TRUE ~ .))) %>% 
+  mutate(tot_sig = n_sig1 + n_sig2) %>% 
+  filter(tot_sig > 7) %>% 
+  mutate(y = 2.6e-10)
+
 ## graph time!
-library(ggplot2)
-library(PNWColors)
-install.packages("viridis")
-library(viridis)
 
-# data frame for previous estimations of mutation rate
-est_mr <- data.frame(yint=1.08e-8)
-
-ggplot(data=species_chrom_mutation_data, aes(x=chrom,y=rate,shape=method,color=species)) +
-  geom_point(size=3.5) +
+ggplot(data=mrate_by_chrom) +
+  geom_violin(aes(x=chrom,y=rate,color=chrom, fill=chrom), alpha = 0.5) +
+  geom_point(data=chrom_dunn_diff, aes(x=chrom2, y = y), shape = 8, size = 1.5, stroke = 1.1, color = "indianred3") +
   theme_light() +
-  labs(x="Chromosome", y="Mutations/site/generation", 
-       title="Chromosome-Level Mutation Rate") +
-  scale_shape_discrete(labels=c('w/o ancestral\nheterozygosity', 'w/ ancestral\nheterozygosity'), name="Method") +
+  labs(x="Chromosome", y="Mutations/site/year") +
   scale_color_viridis(discrete = TRUE) +
+  scale_fill_viridis(discrete = TRUE) +
   theme(axis.title.y = element_text(margin = margin(t=0,r=8,b=0,l=5)),
         axis.title.x = element_text(margin = margin(t=8,r=0,b=5,l=0))) +
-  theme(text = element_text(size = 20)) +
-  geom_hline(data=est_mr, mapping=aes(yintercept=yint, linetype="A")) +
+  theme(text = element_text(size = 16), legend.position = "none") +
   scale_linetype_discrete(labels=c('Odontocete nuclear\nmutation rate\n(Dornburg et al. 2012)'), 
                           name="Estimates")
 
-# OPTIONAL:what is the range in mutation rate for species vs. chromosomes?
-  species_chrom_mutation_data %>% 
+# Mean range in mutation rate variabilty among chromosomes
+chrom_rate_range <- mrate_by_chrom %>% 
     group_by(species) %>% 
-    summarise(minmax = range(rate)) %>% 
-    group_by(species) %>% 
-    summarise(range = max(minmax)-min(minmax))
+    mutate(range = max(rate)-min(rate)) %>% 
+    ungroup() %>% 
+    summarise(mean = mean(range), max = max(range), min = min(range))
   
-  species_chrom_mutation_data %>% 
-    group_by(chrom) %>% 
-    summarise(minmax = range(rate)) %>% 
-    group_by(chrom) %>% 
-    summarise(range = max(minmax)-min(minmax))
-  
-  
+
+save(chrom_rate_range, mrate_by_chrom, 
+     chrom_normality, chrom_dunn_diff, 
+     kw_chrom, file = "mrate_by_chromosome.Rdata")
+
