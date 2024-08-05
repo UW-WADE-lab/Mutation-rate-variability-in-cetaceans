@@ -6,6 +6,10 @@
 library(tidyverse)
 library(ggpubr)
 library(PNWColors)
+library(png)
+
+#### Load whale images ---------------------------------------------------------
+fin <- readPNG("fin-whale-silhouette.png")
 
 #### Load genome metadata, reference metadata, and cetacean heterozygosity -----
 
