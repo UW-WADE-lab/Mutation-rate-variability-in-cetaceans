@@ -7,6 +7,7 @@ library(tidyverse)
 library(ggpubr)
 library(PNWColors)
 library(png)
+library(dunn.test)
 
 #### Load whale images ---------------------------------------------------------
 fin <- readPNG("fin-whale-silhouette.png")
