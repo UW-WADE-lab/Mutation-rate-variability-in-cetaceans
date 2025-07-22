@@ -1,5 +1,5 @@
 # Calculate whole-genome mutation rate
-# AVC 07/2024, edited from Sophe Garrottee 11/2023
+# AVC 07/2024, edited from Sophie Garrotte 11/2023
 
 ###############################################################################
 
@@ -9,31 +9,53 @@ library(PNWColors)
 library(png)
 library(dunn.test)
 
-#### Load whale images ---------------------------------------------------------
-fin <- readPNG("fin-whale-silhouette.png")
-
 #### Load genome metadata, reference metadata, and cetacean heterozygosity -----
 
+#species metadata
 genome_metadata <- read.csv("genome_metadata.csv")
+
+#sample metadata
 sample_table_data <- read.csv("sample_info_table.csv") %>% 
-  left_join(genome_metadata %>% select(abbrev, gen_time, length_m, lifespan) %>% group_by(abbrev)
+  left_join(genome_metadata %>% dplyr::select(abbrev, gen_time, length_m, lifespan) %>% group_by(abbrev)
             %>% slice_head() %>% ungroup,
             by = c("abbreviation" = "abbrev"))
+
+#reference sequence metadata
 reference_table_data <- read.csv("reference_info_table.csv")
+
+#estimated heterozygosity
 cet_het <- read.csv("cetacean_genome_heterozygosity.csv") %>% 
   dplyr::select(Species, Observed_pi)
 
+# altRef_snps <- read.delim("cetacean_snps_au23.txt", sep = " ", header = FALSE) %>% 
+#   rename("abbrev" = 1, "reference" = 2, "total" = 3, "hets" = 4, "hom" = 5, "aallele" = 6) %>% 
+#   filter(reference != "Pmac")
+
 #### Load whole genome heterozygosity, homozygosity, and alternate alleles -----
-data_files <- read.delim("cetacean_snps_au23.txt", sep = " ", header = FALSE) %>% 
-  dplyr::rename("abbrev" = 1, "reference" = 2, "total" = 3, "hets" = 4, "hom" = 5, "aallele" = 6) %>%
+
+data_files <- read.delim("WG_snpcount_Kbre.txt", sep = " ", header = FALSE) %>% 
+  bind_rows(read.delim("WG_snpcount_hippo.txt", sep = " ", header = FALSE)) %>% 
+  bind_rows(read.delim("WG_snpcount_near.txt", sep = " ", header = FALSE)) %>% 
+  dplyr::rename("abbrev" = 1, "hets" = 2, "hom" = 3, "aallele" = 4, "none" = 5, "total" = 6) %>%
+  dplyr::select(-none) %>% 
+  separate(abbrev, sep = "_", into = c("abbrev", NA, "reference")) %>% 
+  separate(hets, sep = ":", into = c(NA, "hets")) %>% 
+  separate(hom, sep = ":", into = c(NA, "hom")) %>% 
+  separate(aallele, sep = ":", into = c(NA, "aallele")) %>% 
+  separate(total, sep = ":", into = c(NA, "total")) %>%
+  mutate_at(c(3:6), as.numeric) %>% 
+  mutate(reference = case_when(is.na(reference)~"Kbre",
+                               reference %in% c("hip", "hippo", "Hamb")~"HipAmp",
+                               reference %in% c("NARW","Egla")~"Egla",
+                               reference %in% c("Oorc","oorc")~"Oorc",
+                               TRUE~"other")) %>% 
   left_join(genome_metadata, by = c("abbrev", "reference")) %>% 
-  left_join(cet_het, by = c("species_latin" = "Species"))
+  left_join(cet_het, by = c("species_latin" = "Species")) 
 
 #### Summarize heterozygosity across cetaceans ---------------------------------
 
 het_summary <- cet_het %>% 
   filter(!is.na(Observed_pi)) %>% 
-  #filter(Species != "Kogia_breviceps") %>% 
   summarise(mean_pi = mean(Observed_pi), max_pi = max(Observed_pi), min_pi = min(Observed_pi)) 
   
   
@@ -111,15 +133,19 @@ for (i in 1:nrow(data_files)) {
   whole_mrate_data <- rbind(whole_mrate_data, temp_wga_data)
 }
 
+whole_mrate_data <- whole_mrate_data %>% 
+  mutate(rate = case_when(rate == Inf~NA,
+                          TRUE~rate))
 #### Test for effect of pi -----------------------------------------------------
 
 pi_test_data <- whole_mrate_data %>% 
   filter(div_est == "McG") %>% 
-  filter(reference == "Pmac") %>% 
+  filter(reference == "Kbre") %>% 
   filter(time_step == "year")
 
 pi_normality <- shapiro.test(pi_test_data$rate)
 pi_normality
+#<0.05 means not normal
 
 pi_kw <- kruskal.test(rate ~ Pimethod, data = pi_test_data)
 pi_kw
@@ -127,7 +153,7 @@ pi_kw
 pi_test_nomax <- pi_test_data %>% 
   filter(Pimethod != "PIsummax")
 
-# post doc dunn test
+# post hoc dunn test
 pi_dunn <- data.frame(dunn.test(pi_test_data$rate, pi_test_data$Pimethod,
                                    method = "bonferroni")) %>% 
   filter(P.adjusted < 0.05) %>% 
@@ -168,18 +194,18 @@ ggplot(data = pi_test_data) +
 #### Test for effect of divergence date ----------------------------------------
 
 div_test_data <- whole_mrate_data %>% 
-  filter(reference == "Pmac") %>% 
+  filter(reference == "Kbre") %>% 
   filter(time_step == "year") %>% 
   filter(Pimethod == "noPI")
 
 div_normality <- shapiro.test(div_test_data$rate)
 div_normality
+#p value >0.05 means it is normal
 
 div_anova <- aov(rate ~ div_est, data = div_test_data)
 summary(div_anova)
 
 ggplot(data = div_test_data, aes(x=div_est, y=rate, fill = div_est, color = div_est, alpha = 0.6)) +
-  geom_hline(aes(yintercept=2.2e-10), linetype= "dotdash") +
   geom_violin() +
   theme_light() +
   xlab("Divergence date estimate") +
@@ -197,7 +223,7 @@ ggplot(data = div_test_data, aes(x=div_est, y=rate, fill = div_est, color = div_
 #mutation rate by species per generation 
 species_mrate_gen <- whole_mrate_data %>% 
   left_join(data_files, by = c("abbrev", "reference", "species")) %>% 
-  filter(reference == "Pmac") %>% 
+  filter(reference == "Kbre") %>% 
   filter(div_est == "McG") %>% 
   filter(time_step == "gen") %>% 
   filter(Pimethod == "noPI")
@@ -205,7 +231,7 @@ species_mrate_gen <- whole_mrate_data %>%
 #mutation rate by species per year 
 species_mrate_year <- whole_mrate_data %>% 
   left_join(data_files, by = c("abbrev", "reference", "species")) %>% 
-  filter(reference == "Pmac") %>% 
+  filter(reference == "Kbre") %>% 
   filter(div_est == "McG") %>% 
   filter(time_step == "year") %>% 
   filter(Pimethod == "noPI")
@@ -214,26 +240,24 @@ species_mrate_year <- whole_mrate_data %>%
 mult_refs_gen <- whole_mrate_data %>% 
   left_join(data_files, by = c("abbrev", "reference", "species")) %>% 
   group_by(species) %>% 
-  filter(n()>18) %>% ungroup() %>%
   filter(div_est == "McG") %>%
   filter(time_step == "gen") %>% 
   filter(Pimethod == "noPI") %>% 
-  mutate(ref_dist = case_when(reference == "Pmac" ~ "Intermediate",
+  mutate(ref_dist = case_when(reference == "Kbre" ~ "Intermediate",
                               reference %in% c("Egla","Oorc") ~ "Recent",
-                              reference == "Hamb" ~ "Deep",
+                              reference == "HipAmp" ~ "Deep",
                               TRUE ~ NA))
 
 #mutation rate by species per year w multiple references 
 mult_refs_year <- whole_mrate_data %>% 
   left_join(data_files, by = c("abbrev", "reference", "species")) %>% 
   group_by(species) %>% 
-  filter(n()>18) %>% ungroup() %>%
   filter(div_est == "McG") %>%
   filter(time_step == "year") %>% 
   filter(Pimethod == "noPI") %>% 
-  mutate(ref_dist = case_when(reference == "Pmac" ~ "Intermediate",
+  mutate(ref_dist = case_when(reference == "Kbre" ~ "Intermediate",
                               reference %in% c("Egla","Oorc") ~ "Recent",
-                              reference == "Hamb" ~ "Deep",
+                              reference == "HipAmp" ~ "Deep",
                               TRUE ~ NA))
 
 #mutation rate by species w multiple references 
@@ -243,9 +267,9 @@ mult_refs <- whole_mrate_data %>%
   filter(n()>18) %>% ungroup() %>%
   filter(div_est == "McG") %>%
   filter(Pimethod == "noPI") %>% 
-  mutate(ref_dist = case_when(reference == "Pmac" ~ "Intermediate",
+  mutate(ref_dist = case_when(reference == "Kbre" ~ "Intermediate",
                               reference %in% c("Egla","Oorc") ~ "Recent",
-                              reference == "Hamb" ~ "Deep",
+                              reference == "HipAmp" ~ "Deep",
                               TRUE ~ NA))
 
 #test whether mutation rate is normally distributed
@@ -255,6 +279,7 @@ ggqqplot(species_mrate_year$rate)
 
 species_rate_normality <- shapiro.test(species_mrate_year$rate)
 species_rate_normality
+#p value >0.05 means this is normal
 
 # multi-ref species, mutation/gen
 hist(mult_refs_gen$rate)
@@ -262,6 +287,7 @@ ggqqplot(mult_refs_gen$rate)
 
 ref_normality <- shapiro.test(mult_refs_gen$rate)
 ref_normality
+#p value <0.05 means this is not normal
 
 #is mutation rate significantly different among infraorder or family?
 infraorder_anova_gen <- aov(rate ~ infraorder, data = species_mrate_gen)
@@ -316,14 +342,14 @@ ggplot(data=species_mrate_gen, aes(x=abbrev,y=rate,shape=div_est,color=species))
   geom_point(size=3.7) +
   labs(x="Species", y="Mutations/site/generation",
        title="Whole Genome Mutation Rate", 
-       subtitle = "Aligned to a sperm whale reference genome with the McGowan et al (2020)\ndivergence estimates") +
+       subtitle = "Aligned to a Kbre reference genome with the McGowen et al (2020)\ndivergence estimates") +
   theme_light() +
   theme(text = element_text(size = 20), plot.subtitle = element_text(size = 14)) +
   guides(color="none") +
   theme(plot.margin = unit(c(10,30,0,0), 'pt'), axis.title.y = element_text(margin = margin(t=0,r=12,b=0,l=5)),
         axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0))) +
   scale_shape_discrete(guide="none") +
-  scale_color_manual(values=pnw_palette(n=14,name="Sunset2")) +
+  scale_color_manual(values=pnw_palette(n=19,name="Sunset2")) +
   geom_hline(aes(yintercept=1.08e-8, linetype="B")) +
   scale_linetype_discrete(labels=c('Odontocete nuclear\nmutation rate\n(Dornburg et al. 2012)'), 
                           name="Estimates")
@@ -362,7 +388,7 @@ ggplot(data=species_mrate_year, aes(x=lifespan,y=rate)) +
 #linear plot
 ggplot(data=species_mrate_year, aes(x=gen_time,y=rate)) +
   geom_point(aes(color=factor(infraorder)), size=3.7) +
-  labs(x="Generation time", y="Mutations/site/year") +
+  labs(x="Generation time", y="Mutations/site/generation") +
   theme_light() +
   theme(text = element_text(size = 16)) +
   theme(plot.margin = unit(c(10,30,0,0), 'pt'), axis.title.y = element_text(margin = margin(t=0,r=12,b=0,l=5)),

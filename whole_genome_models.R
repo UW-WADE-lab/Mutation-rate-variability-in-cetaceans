@@ -38,6 +38,7 @@ demographic_correlation
 
 corrplot(demographic_correlation, method = "shade",type = "upper", 
          order = "hclust", addCoef.col = "black", diag = FALSE)
+round(demographic_correlation[2,3], digits = 2)
 
 # correlation between infraorder and lifespan?
 life_order_corr <- biserial.cor(species_mrate_gen$lifespan, species_mrate_gen$infraorder)
@@ -48,7 +49,7 @@ life_order_corr <- biserial.cor(species_mrate_gen$lifespan, species_mrate_gen$in
 # mrate histogram (only Pmac + McGowen)
 hist(species_mrate_gen$rate)
 shapiro.test(species_mrate_gen$rate)
-# p-value = 0.63
+# p-value = 0.88
 
 # mrate histogram (all references + estimates)
 hist(whole_mrate_data$rate)
@@ -65,7 +66,8 @@ shapiro.test(whole_mrate_data$rate)
 #mutations/year by lifespan
 lifespan_pgls_year <- gls(rate ~ lifespan, 
                           correlation = corBrownian(phy = cet_tree, form = ~species_latin),
-                     data=species_mrate_year, method = "ML")
+                     data=species_mrate_year, method = "ML",
+                     na.action=na.exclude)
 
 summary(lifespan_pgls_year)
 
@@ -73,26 +75,33 @@ pgls_year_models <- data.frame(model = c("lifespan", "length (m)", "generation t
                                          "all parameters"),
                                AIC = c(AIC(gls(rate ~ lifespan, 
                                                correlation = corBrownian(phy = cet_tree, form = ~species_latin),
-                                               data=species_mrate_year, method = "ML")),
+                                               data=species_mrate_year, method = "ML",
+                                               na.action=na.exclude)),
                                        AIC(gls(rate ~ length_m, 
                                                correlation = corBrownian(phy = cet_tree, form = ~species_latin),
-                                               data=species_mrate_year, method = "ML")),
+                                               data=species_mrate_year, method = "ML",
+                                               na.action=na.exclude)),
                                        AIC(gls(rate ~ gen_time, 
                                                correlation = corBrownian(phy = cet_tree, form = ~species_latin),
-                                               data=species_mrate_year, method = "ML")),
+                                               data=species_mrate_year, method = "ML",
+                                               na.action=na.exclude)),
                                        AIC(gls(rate ~ lifespan + length_m + gen_time, 
                                                correlation = corBrownian(phy = cet_tree, form = ~species_latin),
-                                               data=species_mrate_year, method = "ML"))))
+                                               data=species_mrate_year, method = "ML",
+                                               na.action=na.exclude))))
 
 #mutations/generation by lifespan
 lifespan_pgls_gen <- gls(rate ~ lifespan, correlation = corBrownian(phy = cet_tree, form = ~species_latin),
-                     data=species_mrate_gen, method = "REML")
+                     data=species_mrate_gen, method = "REML",
+                     na.action=na.exclude)
 
 summary(lifespan_pgls_gen)
 AIC(lifespan_pgls_gen)
 
 lifespan_tTable <- summary(lifespan_pgls_gen)$tTable
-pGLS_ci<-gls.ci(species_mrate_gen$rate,species_mrate_gen$lifespan,vcv(cet_tree))
+species_mrate_gen_noKog <- species_mrate_gen %>% 
+  filter(abbrev != "Kbre")
+pGLS_ci<-gls.ci(species_mrate_gen_noKog$rate,species_mrate_gen$lifespan_noKog,vcv(cet_tree))
 
 par(mfrow=c(1,1))
 plot(rate~lifespan, data = species_mrate_gen)
@@ -139,4 +148,5 @@ lifegen_lm <- lm(formula = rate ~ lifespan + gen_time, data = species_mrate_year
 summary(lifegen_lm)
 
 ##save dataframes---------------------------------------------------------------
-save(life_order_corr, lifespan_pgls_gen, ci, lifespan_tTable, file = "mrate_models_df.Rdata")
+save(life_order_corr, lifespan_pgls_gen, ci, lifespan_tTable, demographic_correlation,
+     file = "mrate_models_df.Rdata")
