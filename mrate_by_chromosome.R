@@ -16,31 +16,36 @@ library(dunn.test)
 ### Get Pmac chromosome length -------------------------------------------------
 
 #create length column
-chromfile <- read.delim("Pmac_chrom_total.txt", col.names = "filename", header = FALSE)
+chromfile <- read.delim("Kbre_chrom_total.txt", header = TRUE)
 
 chrom.length <- chromfile %>%
-  separate(filename, into = c(NA, "length"), sep = ",") %>%
-  separate(length, into = c(NA, "length"), sep = "=") %>%
-  mutate(length = parse_number(length)) %>% 
+  filter(Chromosome != "AJ554055.1") %>% 
   mutate(chrom.num = row_number()) %>% 
-  mutate(chrom.num = case_when(chrom.num == max(chrom.num) ~ "X", TRUE ~ as.character(chrom.num)))
+  mutate(chrom.num = case_when(chrom.num == max(chrom.num) ~ "X", TRUE ~ as.character(chrom.num))) %>% 
+  rename("length" = RefSeq) %>% 
+  dplyr::select(Chromosome, GenBank, chrom.num, length)
 
 ### Get genome metadata --------------------------------------------------------
 
 genome_metadata <- read.csv("genome_metadata.csv")
 
-### Create data frame from all text files --------------------------------------
+### Get chromosome-level SNP data ----------------------------------------------
 
-chrom_snp_data <- read.csv("SNPs_by_chromosome.csv")
+chrom_snp_data <- read.csv("SNPs_by_chromosome_Kbre.csv") %>% 
+  filter(abbrev != "Kbre") %>% 
+  mutate(length = parse_number(length))
 
 # # accessing processed files containing SNPs partitioned by chromosome
-# data_files <- list.files("M:/Mutation_Rate/Vcf_mutation", pattern = "chrom_count.txt")
+# data_files <- list.files("M:/Mutation_Rate/snp_counts", pattern = "chrom_snpcount.txt")
 # 
 # # Read the files in, add Pmac chrom.length
-# data_files_list <- lapply(paste0("M:/Mutation_Rate/Vcf_mutation/",data_files),
+# data_files_list <- lapply(paste0("M:/Mutation_Rate/snp_counts/",data_files),
 #                           function(x) {read.delim(file = x, header = FALSE, sep =" ") %>%
-#                           dplyr::rename("abbrev" = 1, "reference" = 2, "hets" = 3,
-#                           "hom" = 4, "aallele" = 5)} %>% cbind(chrom.length))
+#                           dplyr::rename("abbrev" = 1, "reference" = 2, "blank" = 3,
+#                           "hets" = 4, "hom" = 5, "aallele" = 6)} %>% 
+#                             filter(hom > 0) %>% 
+#                             cbind(chrom.length) %>% 
+#                             dplyr::select(-blank))
 # 
 # # Combine them
 # chrom_snp_data <- do.call("rbind", lapply(data_files_list, as.data.frame))
@@ -50,7 +55,7 @@ chrom_snp_data <- read.csv("SNPs_by_chromosome.csv")
 #   left_join(genome_metadata, by = c("abbrev", "reference"))
 # 
 # # save as a csv for later use
-# write.csv(chrom_snp_data, file = "SNPs_by_chromosome.csv", row.names=FALSE)
+# write.csv(chrom_snp_data, file = "SNPs_by_chromosome_Kbre.csv", row.names=FALSE)
 
 # Calculate chromosome mutation rates ------------------------------------------
 species_chrom_mutation_data <- data.frame()
@@ -108,7 +113,8 @@ mrate_by_chrom <- species_chrom_mutation_data %>%
 
 # test for normality
 chrom_normality <- shapiro.test(mrate_by_chrom$rate)
-#p-value = 2.466e-06
+chrom_normality
+#p-value = 2.82e-06
 # not normally distributed
 hist(mrate_by_chrom$rate)
 
@@ -135,8 +141,8 @@ chrom_dunn_diff <- chrom_dunn %>%
   mutate(across(c(n_sig1,n_sig2), 
                 ~ case_when(is.na(.) ~ 0, TRUE ~ .))) %>% 
   mutate(tot_sig = n_sig1 + n_sig2) %>% 
-  filter(tot_sig > 7) %>% 
-  mutate(y = 2.6e-10)
+  filter(tot_sig > 10) %>% 
+  mutate(y = 3.5e-10)
 
 ## graph time!
 

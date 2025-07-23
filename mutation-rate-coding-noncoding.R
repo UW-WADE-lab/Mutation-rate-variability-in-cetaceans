@@ -7,51 +7,56 @@ library(tidyverse)
 
 # get metadata
 genome_metadata <- read.csv("genome_metadata.csv") %>% 
-  filter(reference == "Pmac")
+  filter(reference == "Kbre")
 
 #### Get Pmac chromosome names -------------------------------------------------
 
-pmac_chrom <- read.delim("G:/My Drive/00 UW/00.5 W.A.D.E. lab resources/Intern Projects/Mutation rate variability/05 metadata/Pmac_sequence_report.tsv", sep = "\t") %>% 
-  select(Chromosome.name, RefSeq.seq.accession) %>% 
-  filter(Chromosome.name != "Un")
+kbre_chrom <- read.csv("SNPs_by_chromosome_Kbre.csv") %>% 
+  dplyr::select(GenBank, chrom.num) %>% 
+  distinct()
 
 #### Create BED file for coding regions ----------------------------------------
 
 pmac_code <- read.delim("G:/My Drive/00 UW/00.5 W.A.D.E. lab resources/Intern Projects/Mutation rate variability/06 coding_noncoding_snps/Pmac_protein_coding_regions.tsv", sep = "\t") %>% 
-  select(Chromosome, Begin, End, Name) %>% 
+  dplyr::select(Chromosome, Begin, End, Name) %>% 
   filter(Chromosome != "MT") %>% 
   filter(Chromosome != "") %>% 
   left_join(pmac_chrom, by = c("Chromosome" = "Chromosome.name")) %>% 
-  select(-Chromosome) %>% 
+  dplyr::select(-Chromosome) %>% 
   rename("Chromosome" = RefSeq.seq.accession) %>% 
   relocate(Chromosome, .before = Begin)
 
-# write_delim(pmac_code, file = "06 coding_noncoding_snps/Pmac_protein_coding_regions.bed", delim = "\t", col_names = FALSE,
-#             quote = "none")
+kbre_genes <- read.delim("Kbre_annotations.tsv", sep = "\t") %>% 
+  dplyr::select(Chromosome, Begin, End, Name, Gene.Type) %>% 
+  filter(Chromosome != "MT") %>% 
+  filter(Chromosome != "") %>% 
+  left_join(kbre_chrom, by = c("Chromosome" = "chrom.num")) %>% 
+  dplyr::select(-Chromosome) %>% 
+  rename("Chromosome" = GenBank) %>% 
+  relocate(Chromosome, .before = Begin) 
+
+kbre_code <- kbre_genes %>% 
+  filter(Gene.Type == "protein-coding")
+
+write_delim(kbre_code, file = "Kbre_protein_coding_regions.bed", delim = "\t", col_names = FALSE,
+            quote = "none")
 
 # calculate total length of coding regions
-code_length <- pmac_code %>% 
+code_length <- kbre_code %>% 
   mutate(length = End - Begin) %>% 
   summarize(tot.len = sum(length)) %>% 
   pull(tot.len)
 
 #### Create BED file for non-coding regions ------------------------------------
 
-pmac_noncode <- read.delim("G:/My Drive/00 UW/00.5 W.A.D.E. lab resources/Intern Projects/Mutation rate variability/06 coding_noncoding_snps/Pmac_non_coding_regions.tsv", sep = "\t") %>% 
-  select(Accession, Chromosome, Begin, End, Name) %>% 
-  filter(Chromosome != "MT") %>% 
-  filter(Chromosome != "") %>% 
-  mutate(Chromosome = as.character(Chromosome)) %>% 
-  left_join(pmac_chrom, by = c("Chromosome" = "Chromosome.name")) %>% 
-  select(-Chromosome) %>% 
-  rename("Chromosome" = RefSeq.seq.accession) %>% 
-  relocate(Chromosome, .before = Begin)
+kbre_noncode <- kbre_genes %>% 
+  filter(Gene.Type != "protein-coding")
 
-# write_delim(pmac_noncode, file = "06 coding_noncoding_snps/Pmac_non_coding_regions.bed", delim = "\t", col_names = FALSE,
-#             quote = "none")
+write_delim(kbre_noncode, file = "Kbre_non_coding_regions.bed", delim = "\t", col_names = FALSE,
+            quote = "none")
 
 # calculate total length of non-coding regions
-noncode_length <- pmac_noncode %>% 
+noncode_length <- kbre_noncode %>% 
   mutate(length = End - Begin) %>% 
   summarize(tot.len = sum(length)) %>% 
   pull(tot.len)
@@ -67,25 +72,27 @@ noncode_length <- pmac_noncode %>%
 
 #### Read in txt files with number of SNPs in coding and noncoding regions -----
 
-coding_data_files <- list.files(path = "G:/My Drive/00 UW/00.5 W.A.D.E. lab resources/Intern Projects/Mutation rate variability/06 coding_noncoding_snps/",
+coding_data_files <- list.files(path = "M:/Mutation_Rate/snp_counts",
                                 pattern = "_coding_snps.txt")
 
-pcoding_data <- do.call(rbind, lapply(paste0("G:/My Drive/00 UW/00.5 W.A.D.E. lab resources/Intern Projects/Mutation rate variability/06 coding_noncoding_snps/", coding_data_files), 
+pcoding_data <- do.call(rbind, lapply(paste0("M:/Mutation_Rate/snp_counts/", coding_data_files), 
                                      read.delim, sep=" ", 
                                      header = FALSE, 
                                      col.names = c("hets","homs","aallele"))) %>% 
+  filter(hets > 0) %>% 
   mutate(file = coding_data_files) %>% 
   separate(file, into = c("sp_code", NA), sep = "_") %>% 
   mutate(tot.length = code_length) %>% 
   mutate(snp_type = "coding")
 
-noncoding_data_files <- list.files(path = "G:/My Drive/00 UW/00.5 W.A.D.E. lab resources/Intern Projects/Mutation rate variability/06 coding_noncoding_snps/",
+noncoding_data_files <- list.files(path = "M:/Mutation_Rate/snp_counts",
                                    pattern = "noncoding_snps.txt")
 
-noncoding_data <- do.call(rbind, lapply(paste0("G:/My Drive/00 UW/00.5 W.A.D.E. lab resources/Intern Projects/Mutation rate variability/06 coding_noncoding_snps/", noncoding_data_files), 
+noncoding_data <- do.call(rbind, lapply(paste0("M:/Mutation_Rate/snp_counts/", noncoding_data_files), 
                                       read.delim, sep=" ", 
                                       header = FALSE, 
                                       col.names = c("hets","homs","aallele"))) %>% 
+  filter(hets >0) %>% 
   mutate(file = noncoding_data_files) %>% 
   separate(file, into = c("sp_code", NA), sep = "_") %>% 
   mutate(tot.length = noncode_length) %>% 
@@ -130,13 +137,16 @@ for (i in 1:nrow(combined_data)) {
 }
 
 code_noncode_data <- code_noncode_data %>% 
-  mutate(suborder = case_when(species %in% c("Bmus","Egla","Bacu","Erob","Bric")~"Mysticete",
-                   species %in% c("Kbre","Igeo","Pele","Mden","Oorc","Psin","Ddel","Hamp","Scoe")~"Odontocete",
-                   TRUE~NA))
+  mutate(suborder = case_when(species %in% c("Bmus","Egla","Bacu","Erob","Bric", "Mnov")~"Mysticete",
+                   species %in% c("Kbre","Igeo","Pele","Mden","Oorc","Psin","Ddel",
+                                  "Hamp","Scoe","Ggri","Gmel","Lalb")~"Odontocete",
+                   TRUE~NA)) %>% 
+  filter(species != "Kbre")
 
 #### Test for differentiation in rates in coding and non-coding regions --------
 
 coding_normality <- shapiro.test(code_noncode_data$rate)
+coding_normality
 
 code_noncode_aov <- aov(rate ~ snp_type, data = code_noncode_data %>% 
                           filter(method == "noPI"))
@@ -172,7 +182,7 @@ ggplot(data=code_noncode_data, aes(x=snp_type,y=rate,shape=method,color=species)
   labs(x="Coding vs. noncoding regions", y="Mutations/site/generation", 
        title="Mutation Rate by region") +
   scale_shape_discrete(labels=c('w/o ancestral\nheterozygosity', 'w/ ancestral\nheterozygosity'), name="Method") +
-  scale_color_manual(values=pnw_palette(n=14,name="Sunset2"), 
+  scale_color_manual(values=pnw_palette(n=18,name="Sunset2"), 
                      #labels=c("Risso's dolphin","Short-finned\npilot whale","Indo-Pacific\nhumpback dolphin"),
                      name="Species") +
   theme(axis.title.y = element_text(margin = margin(t=0,r=8,b=0,l=5)),
@@ -196,4 +206,6 @@ ggplot(data=code_noncode_data, aes(x=suborder,y=rate,fill=snp_type)) +
         axis.title.x = element_text(margin = margin(t=8,r=0,b=5,l=0))) +
   theme(text = element_text(size = 20))
 
-save(coding_difference, code_noncode_aov, code_noncode_data, odon_coding_aov, myst_coding_aov, file = "G:/My Drive/07 Mutation rate variability/Mutation-rate-variability-in-cetaceans/Mutation-rate-coding-noncoding.Rdata")
+save(coding_difference, code_noncode_aov, 
+     code_noncode_data, odon_coding_aov, 
+     myst_coding_aov, file = "Mutation-rate-coding-noncoding.Rdata")

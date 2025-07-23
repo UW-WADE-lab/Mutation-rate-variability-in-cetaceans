@@ -26,9 +26,14 @@ load("whole_mutation_rate_df.Rdata") #from whole_genome_rate R script
 #load metadata
 genome_metadata <- read.csv("genome_metadata.csv")
 
+pgls_species <- genome_metadata %>% 
+  filter(abbrev != "Kbre") %>% 
+  distinct(species_latin) %>% 
+  pull(species_latin) 
+  
 #load cetacean phylogeny
 cet_tree <- read.tree("cetacea_species.nwk")
-cet_tree <- keep.tip(cet_tree, tip = genome_metadata$species_latin)
+cet_tree <- keep.tip(cet_tree, tip = pgls_species)
 
 ##CORRELATION TESTING-----------------------------------------------------------
 # correlation matrix
@@ -101,7 +106,8 @@ AIC(lifespan_pgls_gen)
 lifespan_tTable <- summary(lifespan_pgls_gen)$tTable
 species_mrate_gen_noKog <- species_mrate_gen %>% 
   filter(abbrev != "Kbre")
-pGLS_ci<-gls.ci(species_mrate_gen_noKog$rate,species_mrate_gen$lifespan_noKog,vcv(cet_tree))
+
+pGLS_ci<-gls.ci(species_mrate_gen_noKog$rate,species_mrate_gen_noKog$lifespan,vcv(cet_tree))
 
 par(mfrow=c(1,1))
 plot(rate~lifespan, data = species_mrate_gen)
@@ -121,7 +127,7 @@ ggplot(data = species_mrate_gen) +
   geom_ribbon(data = ci, aes(x= x, ymin = ymin, 
                                   ymax = ymax), alpha = 0.4, fill = "grey50")+
   xlim(20,150)+
-  ylim(0,1e-8) +
+  ylim(0,1.3e-8) +
   labs(x="Lifespan", y="Mutations/site/generation") +
   theme_light() +
   theme(text = element_text(size = 16)) +
