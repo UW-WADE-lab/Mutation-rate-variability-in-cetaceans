@@ -123,7 +123,7 @@ kw_chrom <- kruskal.test(rate~chrom, data = mrate_by_chrom)
 
 mrate_by_chrom %>% kruskal_effsize(rate~chrom) %>% pull(effsize)
 
-# post doc dunn test
+# post hoc dunn test
 chrom_dunn <- data.frame(dunn.test(mrate_by_chrom$rate, mrate_by_chrom$chrom,
           method = "bonferroni")) %>% 
   filter(P.adjusted < 0.05) %>% 

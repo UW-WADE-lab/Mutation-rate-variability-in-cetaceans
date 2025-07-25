@@ -50,7 +50,8 @@ data_files <- read.delim("WG_snpcount_Kbre.txt", sep = " ", header = FALSE) %>%
                                reference %in% c("Oorc","oorc")~"Oorc",
                                TRUE~"other")) %>% 
   left_join(genome_metadata, by = c("abbrev", "reference")) %>% 
-  left_join(cet_het, by = c("species_latin" = "Species")) 
+  left_join(cet_het, by = c("species_latin" = "Species")) %>% 
+  filter(abbrev != reference)
 
 #### Summarize heterozygosity across cetaceans ---------------------------------
 

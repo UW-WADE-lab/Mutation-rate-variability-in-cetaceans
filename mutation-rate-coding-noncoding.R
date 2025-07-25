@@ -17,14 +17,14 @@ kbre_chrom <- read.csv("SNPs_by_chromosome_Kbre.csv") %>%
 
 #### Create BED file for coding regions ----------------------------------------
 
-pmac_code <- read.delim("G:/My Drive/00 UW/00.5 W.A.D.E. lab resources/Intern Projects/Mutation rate variability/06 coding_noncoding_snps/Pmac_protein_coding_regions.tsv", sep = "\t") %>% 
-  dplyr::select(Chromosome, Begin, End, Name) %>% 
-  filter(Chromosome != "MT") %>% 
-  filter(Chromosome != "") %>% 
-  left_join(pmac_chrom, by = c("Chromosome" = "Chromosome.name")) %>% 
-  dplyr::select(-Chromosome) %>% 
-  rename("Chromosome" = RefSeq.seq.accession) %>% 
-  relocate(Chromosome, .before = Begin)
+# pmac_code <- read.delim("G:/My Drive/00 UW/00.5 W.A.D.E. lab resources/Intern Projects/Mutation rate variability/06 coding_noncoding_snps/Pmac_protein_coding_regions.tsv", sep = "\t") %>% 
+#   dplyr::select(Chromosome, Begin, End, Name) %>% 
+#   filter(Chromosome != "MT") %>% 
+#   filter(Chromosome != "") %>% 
+#   left_join(pmac_chrom, by = c("Chromosome" = "Chromosome.name")) %>% 
+#   dplyr::select(-Chromosome) %>% 
+#   rename("Chromosome" = RefSeq.seq.accession) %>% 
+#   relocate(Chromosome, .before = Begin)
 
 kbre_genes <- read.delim("Kbre_annotations.tsv", sep = "\t") %>% 
   dplyr::select(Chromosome, Begin, End, Name, Gene.Type) %>% 
@@ -208,4 +208,5 @@ ggplot(data=code_noncode_data, aes(x=suborder,y=rate,fill=snp_type)) +
 
 save(coding_difference, code_noncode_aov, 
      code_noncode_data, odon_coding_aov, 
+     coding_normality,
      myst_coding_aov, file = "Mutation-rate-coding-noncoding.Rdata")

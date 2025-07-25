@@ -170,9 +170,9 @@ We also consider the effect of variability in two estimated parameters that are 
 
 **Chromosome position:** We indexed the genomic position of each chromosome using a bed file generated from the annotated pygmy sperm whale reference genome, extracted SNP data on a per-chromosome basis, and estimated a mutation rate ($\mu$) for each chromosome of each genome included in the study. We used a Shapiro-Wilk normality test to determine that this mutation rate dataset is not normally distributed (p = `r round(chrom_normality$p.value, digits = 7)`). We therefore used a non-parametric Kruskal-Wallis analysis (REF) to determine whether mutation rate varies significantly among chromosomes across all 14 species included in the study, and a post hoc Dunn test (REF) to identify chromosomes driving any signal of differentiation.
 
-**Inclusion of coding vs non-coding regions:** We indexed the genomic position of coding and non-coding regions using a bed file generated from the annotated pygmy sperm whale reference genome, extracted SNP data in each region, and estimated mutation rates ($\mu$) in coding and non-coding regions of each genome included in the study. We used a Shapiro-Wilk normality test to determine that this mutation rate dataset is normally distributed (P VALUE HERE). We then used an ANOVA to compare mutation rate estimates between these two regions across all fourteen species included in the study.
+**Inclusion of coding vs non-coding regions:** We indexed the genomic position of coding and non-coding regions using a bed file generated from the annotated pygmy sperm whale reference genome, extracted SNP data in each region, and estimated mutation rates ($\mu$) in coding and non-coding regions of each genome included in the study. We used a Shapiro-Wilk normality test to determine that this mutation rate dataset is normally distributed (p = `r round(coding_normality$p.value, digits = 2)`). We then used an ANOVA to compare mutation rate estimates between these two regions across all fourteen species included in the study.
 
-**Maximum read-depth cutoff:** We first generated new genotype vcf files with calls for all loci, including both heterozygous and homozygous loci. Using these vcf files and considering read depths of 10-500 reads, we then used a custom R script to determine the cumulative proportion of heterozygous sites with increasing maximum read depth. Following this, we calculated mutation rate ($\mu$) for each species at maximum read depth cutoffs from 10-500. Finally, we use a generalized linear regression to test whether read depth is a significant driver of mutation rate estimates. Because phylogenetic inertia may be a significant factor affecting variability in mutation rate among species, we used a phylogenetic generalized least squares (PGLS) modeling approach implemented using the pgls package in R (REF), and chose the best model and significant parameters based on reported AIC and p values, respectively.
+**Maximum read-depth cutoff:** We first grouped all mutations into bins between read depths of 11-500 reads (i.e. 11-20, 21-30, ... 491-500) and calculated the cumulative number of mutations at each depth bin. Following this, we calculated mutation rate ($\mu$) for each species at maximum read depth cutoffs from 10-500. Finally, we use a generalized additive regression to test whether read depth is a significant driver of mutation rate estimates and a Kruskal-Wallis test to estimate the size of the effect of read depth on mutation rate estimates.
 
 **Divergence date estimates:** We generated estimates of mutation rate ($\mu$) using fossil-dated divergence times ($t$) from McGowen et al. [-@mcgowen_etal20] (6-partition AR model) and Lloyd and Slater [-@lloyd_slater21] (SAFE metatree analysis), as well as an average across all published divergence times from TimeTree [timetree.org; @kumar_etal17; Supplemental Table S1]. We then re-estimated whole genome mutation rate using each of the species-specific divergence dates. We used a Shapiro-Wilk normality test to determine that this mutation rate dataset is normally distributed (p = `r round(div_normality$p.value, digits = 2)`) and used an ANOVA to compare mutation rate differentiation across the three strata.
 
@@ -188,7 +188,7 @@ For each of these tests, we compared observed patterns using both annual and gen
 
 ## Results {-}
 
-For each combination of species and reference genome, we generated 18 estimates of whole-genome mutation rate by varying estimates of divergence date, ancestral heterozygosity, and annual vs. generational mutation rate estimates. Using the pygmy sperm whale reference genome, divergence date from McGowen et al. [-@mcgowen_etal20], and without correcting for ancestral heterozygosity, we also generated an estimate of mutation rate at each chromosome (n = 20 per species), in both coding and non-coding regions (n = 2 per species), and at maximum read depths of 100-500 (n = XX per species).
+For each combination of species and reference genome, we generated 18 estimates of whole-genome mutation rate by varying estimates of divergence date, ancestral heterozygosity, and annual vs. generational mutation rate estimates. Using the pygmy sperm whale reference genome, divergence date from McGowen et al. [-@mcgowen_etal20], and without correcting for ancestral heterozygosity, we also generated an estimate of mutation rate at each chromosome (n = 20 per species), in both coding and non-coding regions (n = 2 per species), and at maximum read depths of 100-500 (n = 50 per species).
 
 Whole genome mutation rate varies among individual species included in the study; rates largely fall between previously published average estimates for mysticetes and odontocetes (Figure 1).
 
@@ -196,7 +196,7 @@ Whole genome mutation rate varies among individual species included in the study
 
 <br>
 
-```{r whole_genome_rate, fig.align = "center", fig.height = 5, fig.width = 10, fig.cap = "Figure 1. Left: Whole genome annual mutation rate for each cetacean species included in the study, colored by species. Warm colors = mysticetes. Cool colors = odontocetes. Reference distance shown by shape. Species abbreviation codes as in Table 1. Average annual mysticete and odontocete mutation rate estimates from Dornburg et al. 2012 (UCLN model) shown as dashed and dot-dash lines, respectively. Right: Difference in mutation rates between odontocetes (blue) and mysticetes (yellow) across three divergence time strata."}
+```{r whole_genome_rate, fig.align = "center", fig.height = 5, fig.width = 10, fig.cap = "Figure 1. Left: Whole genome annual mutation rate for each cetacean species included in the study, colored by species. Warm colors = mysticetes. Cool colors = odontocetes. Reference distance shown by shape. Species abbreviation codes as in Table 1. Average annual mysticete and odontocete mutation rate estimates from Dornburg et al. 2012 (UCLN model) shown as dashed and dot-dash lines, respectively. Images from phylopic.org. Right: Difference in mutation rates between odontocetes (blue) and mysticetes (yellow) across three divergence time strata."}
 minke <- get_phylopic(uuid = get_uuid(name = "Balaenoptera acutorostrata",n=2)[2])
 blue <- get_phylopic(uuid = get_uuid(name = "Balaenoptera musculus",n=2)[1])
 rice <- get_phylopic(uuid = get_uuid(name = "Balaenoptera brydei"))
@@ -238,22 +238,22 @@ ggplot(aes(x=rate,y=abbrev, color = species)) +
   add_phylopic(minke, x = 1.15e-10, y = 6, width = NA, height = 0.6) +
   add_phylopic(blue, x = 1.24e-10, y = 1, width = NA, height = 0.9) +
   add_phylopic(rice, x = 1.2e-10, y = 5, width = NA, height = 0.6) +
-  add_phylopic(Ddel, x = 1.15e-10, y = 17, width = NA, height = 0.3) +
+  add_phylopic(Ddel, x = 1.15e-10, y = 17, width = NA, height = 0.5) +
   add_phylopic(Egla, x = 1.2e-10, y = 3, width = NA, height = 0.8) +
   add_phylopic(Erob, x = 1.2e-10, y = 2, width = NA, height = 0.7) +
   add_phylopic(Hamp, x = 1.15e-10, y = 7, width = NA, height = 0.4) +
   add_phylopic(Igeo, x = 1.15e-10, y = 9, width = NA, height = 0.3) +
-  add_phylopic(Kbre, x = 1.15e-10, y = 14, width = NA, height = 0.25) +
+  add_phylopic(Kbre, x = 1.15e-10, y = 14, width = NA, height = 0.3) +
   add_phylopic(Mden, x = 1.15e-10, y = 8, width = NA, height = 0.4) +
   add_phylopic(Oorc, x = 1.15e-10, y = 10, width = NA, height = 0.7) +
-  add_phylopic(Pele, x = 1.15e-10, y = 15, width = NA, height = 0.35) +
-  add_phylopic(Psin, x = 1.15e-10, y = 19, width = NA, height = 0.2) +
-  add_phylopic(Scoe, x = 1.15e-10, y = 18, width = NA, height = 0.3) +
+  add_phylopic(Pele, x = 1.15e-10, y = 15, width = NA, height = 0.4) +
+  add_phylopic(Psin, x = 1.15e-10, y = 19, width = NA, height = 0.3) +
+  add_phylopic(Scoe, x = 1.15e-10, y = 18, width = NA, height = 0.4) +
   add_phylopic(Lalb, x = 1.15e-10, y = 16, width = NA, height = 0.25) +
   add_phylopic(Mnov, x = 1.15e-10, y = 4, width = NA, height = 0.8) +
-  add_phylopic(Pcra, x = 1.15e-10, y = 12, width = NA, height = 0.3) +
-  add_phylopic(Ggri, x = 1.15e-10, y = 13, width = NA, height = 0.4) +
-  add_phylopic(Gmel, x = 1.15e-10, y = 11, width = NA, height = 0.3) +
+  add_phylopic(Pcra, x = 1.15e-10, y = 12, width = NA, height = 0.4) +
+  add_phylopic(Ggri, x = 1.15e-10, y = 13, width = NA, height = 0.5) +
+  add_phylopic(Gmel, x = 1.15e-10, y = 11, width = NA, height = 0.4) +
   scale_color_manual(values = species_pal) +
   #xlim(1.05e-10, 9.5e-10) +
   labs(shape = "Reference\nDistance") +
@@ -293,130 +293,133 @@ We first examined the effect of phylogenetic inertia on mutation rate, and found
 
 We then re-analyzed mutation rate between infraorders using generational mutation rates, and found no significant differentiation (ANOVA p = `r format(summary(infraorder_anova_gen)[[1]][1,5], digits = 2)`, Figure 2b). Further, the observed pattern in mutation rate differentiation between infraorders is flipped, with a higher mean generational mutation rate in the mysticetes than in the odontocetes.
 
-When examining the effect of maximum lifespan, asymptotic length, and generation time on annual mutation rate, while controlling for phylogenetic inertia, the model with the lowest AIC included only lifespan but it was not a significant parameter (p = 0.97). However, when considering generational mutation rate for maximum lifespan and asymptotic length only - again controlling for phylogenetic inertia - we found that the AIC-selected model included a significant positive effect of maximum lifespan (p = `r round(lifespan_tTable[2,4], 6)`, Figure 2c), such that generational mutation rate increases with increasing maximum lifespan. Models including asymptotic length had higher AIC values than the model with lifespan as the only parameter; it follows that asymptotic length was not a significant predictor of mutation rate when considered as the only model parameter or in combination with maximum lifespan. **TODO: Update pgls model to exclude Kbre, fix issue with confidence intervals.**
-<br>
+When examining the effect of maximum lifespan, asymptotic length, and generation time on annual mutation rate, while controlling for phylogenetic inertia, the model with the lowest AIC included only lifespan but it was not a significant parameter (p = 0.97). However, when considering generational mutation rate for maximum lifespan and asymptotic length only - again controlling for phylogenetic inertia - we found that the AIC-selected model included a significant positive effect of maximum lifespan (p = `r round(lifespan_tTable[2,4], 6)`, Figure 2c), such that generational mutation rate increases with increasing maximum lifespan. Models including asymptotic length had higher AIC values than the model with lifespan as the only parameter; it follows that asymptotic length was not a significant predictor of mutation rate when considered as the only model parameter or in combination with maximum lifespan. 
 
 <br>
 
-```{r phylogenic_effects, fig.width = 10, fig.height = 5, fig.align = "center", fig.cap = "Figure 2. Left: Variability in annual mutation rate (mutations/site/year) estimated in two infraorders (top) and three families (bottom). Right: Variability in generational mutation rate (mutations/site/generation) estimated in two infraorders (top) and three families (bottom). Outlier species (Amazon river dolphin) remove in figure insets. Far right: Variability in generational mutation rate by species' asymptotic lifespan."}
+<br>
 
-fig8a <- ggplot(data=species_mrate_year, aes(x=infraorder, y=rate, fill=infraorder, color=infraorder)) +
-  geom_boxplot(aes(alpha=0.6)) +
+```{r phylogenic_effects, cache = FALSE, fig.width = 10, fig.height = 5, fig.align = "center", fig.cap = "Figure 2. Left: Variability in annual mutation rate (mutations/site/year) estimated in two infraorders (top) and three families (bottom). Right: Variability in generational mutation rate (mutations/site/generation) estimated in two infraorders (top) and three families (bottom). Outlier species (Amazon river dolphin) remove in figure insets. Far right: Variability in generational mutation rate by species' asymptotic lifespan."}
+
+fig8a <- ggplot(data=species_mrate_year, aes(x=as.factor(infraorder), y=rate, fill=infraorder, color=infraorder)) +
+  geom_boxplot(alpha = 0.6, outliers = FALSE) +
   labs(x=NULL, y="Mutations/site/year") +
   theme_light() +
   theme(text = element_text(size = 14)) +
   scale_color_manual(values=c("#FDAE32FF", "#297A8EFF")) +
   scale_fill_manual(values=c("#FDAE32FF", "#297A8EFF")) +
-  scale_alpha(guide="none") +
-  theme(plot.margin = unit(c(10,30,0,0), 'pt'), axis.title.y = element_text(margin = margin(t=0,r=12,b=0,l=5)),
-        axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0)), legend.position = "none") +
+  theme(plot.margin = unit(c(10,30,0,0), 'pt'), 
+        axis.title.y = element_text(margin = margin(t=0,r=12,b=0,l=5)),
+        axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0)),
+        legend.position = "none") +
   new_scale_color() +
-  geom_quasirandom(aes(color = species, dodge.width = 0.000001)) +
+  geom_beeswarm(aes(color = species), dodge.width = 0.5) +
+  #geom_quasirandom(aes(color = species, dodge.width = 0.000001)) +
   scale_color_manual(values = species_pal)
-
-fig8ainset <- ggplot(data=species_mrate_year %>% filter(abbrev != "Igeo"), aes(x=infraorder, y=rate, fill=infraorder, color=infraorder)) +
-  geom_boxplot(aes(alpha=0.5)) +
-  theme_light() +
-  theme(text = element_text(size = 14), legend.position = "none",
-        axis.title = element_blank(),
-        axis.text = element_blank(),
-        plot.margin = unit(c(0, 0, 0, 0), "null"),
-        panel.margin = unit(c(0, 0, 0, 0), "null"),
-        axis.ticks = element_blank()) +
-  scale_color_manual(values=c("#FDAE32FF", "#297A8EFF")) +
-  scale_fill_manual(values=c("#FDAE32FF", "#297A8EFF")) +
-  scale_alpha(guide="none") +
-  new_scale_color() +
-  geom_quasirandom(aes(color = species, dodge.width = 0.000001)) +
-  scale_color_manual(values = species_pal)
-
-fig8b <- ggplot(data=family_data, aes(x=family, y=rate, fill=family, color=family)) +
-  geom_boxplot(aes(alpha=0.6)) +
-  labs(x=NULL, y=NULL) +
-  theme_light() +
-  theme(text = element_text(size = 14)) +
-  scale_fill_manual(values=pnw_palette(n=6,name="Cascades")[c(1,4,5)]) +
-  scale_color_manual(values=pnw_palette(n=6,name="Cascades")[c(1,4,5)]) +
-  scale_alpha(guide="none") +
-  theme(plot.margin = unit(c(10,30,0,0), 'pt'), axis.title.y = element_text(margin = margin(t=0,r=12,b=0,l=5)),
-        axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0)), legend.position = "none") +
-  new_scale_color() +
-  geom_quasirandom(aes(color = species, dodge.width = 0.000001)) +
-  scale_color_manual(values = species_pal) +
-  scale_x_discrete(guide = guide_axis(n.dodge=2))
 
 fig8c <- ggplot(data=species_mrate_gen, aes(x=infraorder, y=rate, fill=infraorder, color=infraorder)) +
-  geom_boxplot(aes(alpha = 0.5)) +
+  geom_boxplot(alpha = 0.6, outliers = FALSE) +
   labs(x=NULL, y="Mutations/site/generation") +
   theme_light() +
   theme(text = element_text(size = 14)) +
   scale_color_manual(values=c("#FDAE32FF", "#297A8EFF")) +
   scale_fill_manual(values=c("#FDAE32FF", "#297A8EFF")) +
-  scale_alpha(guide="none") +
-  theme(plot.margin = unit(c(10,30,0,0), 'pt'), axis.title.y = element_text(margin = margin(t=0,r=12,b=0,l=5)),
-        axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0)), legend.position = "none") +
+  theme(plot.margin = unit(c(10,30,0,0), 'pt'), 
+        axis.title.y = element_text(margin = margin(t=0,r=12,b=0,l=5)),
+        axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0)), 
+        legend.position = "none") +
   new_scale_color() +
   geom_quasirandom(aes(color = species, dodge.width = 0.000001)) +
   scale_color_manual(values = species_pal)
 
-fig8cinset <- ggplot(data=species_mrate_gen %>% filter(abbrev != "Igeo"), aes(x=infraorder, y=rate, fill=infraorder, color=infraorder)) +
-  geom_violin(aes(alpha=0.6)) +
-  theme_light() +
-  theme(text = element_text(size = 14), legend.position = "none",
-        axis.title = element_blank(),
-        axis.text = element_blank(),
-        plot.margin = unit(c(0, 0, 0, 0), "null"),
-        panel.margin = unit(c(0, 0, 0, 0), "null"),
-        axis.ticks = element_blank()) +
-  scale_fill_manual(values=pnw_palette(n=6,name="Cascades")[c(3,6)]) +
-  scale_color_manual(values=pnw_palette(n=6,name="Cascades")[c(3,6)]) +
-  scale_alpha(guide="none") +
-  new_scale_color() +
-  geom_quasirandom(aes(color = species, dodge.width = 0.000001)) +
-  scale_color_manual(values = species_pal)
+# fig8ainset <- ggplot(data=species_mrate_year %>% filter(abbrev != "Igeo"), aes(x=infraorder, y=rate, fill=infraorder, color=infraorder)) +
+#   geom_boxplot(aes(alpha=0.5)) +
+#   theme_light() +
+#   theme(text = element_text(size = 14), legend.position = "none",
+#         axis.title = element_blank(),
+#         axis.text = element_blank(),
+#         plot.margin = unit(c(0, 0, 0, 0), "null"),
+#         panel.margin = unit(c(0, 0, 0, 0), "null"),
+#         axis.ticks = element_blank()) +
+#   scale_color_manual(values=c("#FDAE32FF", "#297A8EFF")) +
+#   scale_fill_manual(values=c("#FDAE32FF", "#297A8EFF")) +
+#   scale_alpha(guide="none") +
+#   new_scale_color() +
+#   geom_quasirandom(aes(color = species, dodge.width = 0.000001)) +
+#   scale_color_manual(values = species_pal)
 
-fig8d <- ggplot(data=family_data_gen, aes(x=family, y=rate, fill=family, color=family)) +
-  geom_boxplot(aes(alpha=0.6)) +
-  labs(x=NULL, y=NULL) +
-  theme_light() +
-  theme(text = element_text(size = 14)) +
-  scale_fill_manual(values=pnw_palette(n=6,name="Cascades")[c(1,4,5)]) +
-  scale_color_manual(values=pnw_palette(n=6,name="Cascades")[c(1,4,5)]) +
-  scale_alpha(guide="none") +
-  theme(plot.margin = unit(c(10,30,0,0), 'pt'), axis.title.y = element_text(margin = margin(t=0,r=12,b=0,l=5)),
-        axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0)), legend.position = "none") +
-  new_scale_color() +
-  geom_quasirandom(aes(color = species, dodge.width = 0.000001)) +
-  scale_color_manual(values = species_pal) +
-  scale_x_discrete(guide = guide_axis(n.dodge=2))
-
-top <- wrap_elements((fig8a + inset_element(fig8ainset, 0.002, 0.61, 0.4, 0.99)) + (fig8c + inset_element(fig8cinset, 0.002, 0.002, 0.4, 0.35))) +
-  labs(tag = "Infraorder") +
-  theme(
-    plot.tag = element_text(size = rel(1.3)),
-    plot.tag.position = "bottom"
-  )
-
-bottom <- wrap_elements(fig8b + fig8d) +
-  labs(tag = "Family") +
-  theme(
-    plot.tag = element_text(size = rel(1.3)),
-    plot.tag.position = "bottom"
-  )
-
-left <- wrap_elements((fig8a + inset_element(fig8ainset, 0.002, 0.61, 0.4, 0.99))) +
-  labs(tag = "Mutations/site/year") +
-  theme(
-    plot.tag = element_text(size = rel(1.3), angle = 90),
-    plot.tag.position = "left"
-  )
-
-right <- wrap_elements((fig8c + inset_element(fig8cinset, 0.002, 0.002, 0.4, 0.35))) +
-  labs(tag = "Mutations/site/generation") +
-  theme(
-    plot.tag = element_text(size = rel(1.3), angle = 90),
-    plot.tag.position = "left"
-  )
+# fig8b <- ggplot(data=family_data, aes(x=family, y=rate, fill=family, color=family)) +
+#   geom_boxplot(aes(alpha=0.6)) +
+#   labs(x=NULL, y=NULL) +
+#   theme_light() +
+#   theme(text = element_text(size = 14)) +
+#   scale_fill_manual(values=pnw_palette(n=6,name="Cascades")[c(1,4,5)]) +
+#   scale_color_manual(values=pnw_palette(n=6,name="Cascades")[c(1,4,5)]) +
+#   scale_alpha(guide="none") +
+#   theme(plot.margin = unit(c(10,30,0,0), 'pt'), axis.title.y = element_text(margin = margin(t=0,r=12,b=0,l=5)),
+#         axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0)), legend.position = "none") +
+#   new_scale_color() +
+#   geom_quasirandom(aes(color = species, dodge.width = 0.000001)) +
+#   scale_color_manual(values = species_pal) +
+#   scale_x_discrete(guide = guide_axis(n.dodge=2))
+# fig8cinset <- ggplot(data=species_mrate_gen %>% filter(abbrev != "Igeo"), aes(x=infraorder, y=rate, fill=infraorder, color=infraorder)) +
+#   geom_violin(aes(alpha=0.6)) +
+#   theme_light() +
+#   theme(text = element_text(size = 14), legend.position = "none",
+#         axis.title = element_blank(),
+#         axis.text = element_blank(),
+#         plot.margin = unit(c(0, 0, 0, 0), "null"),
+#         panel.margin = unit(c(0, 0, 0, 0), "null"),
+#         axis.ticks = element_blank()) +
+#   scale_fill_manual(values=pnw_palette(n=6,name="Cascades")[c(3,6)]) +
+#   scale_color_manual(values=pnw_palette(n=6,name="Cascades")[c(3,6)]) +
+#   scale_alpha(guide="none") +
+#   new_scale_color() +
+#   geom_quasirandom(aes(color = species, dodge.width = 0.000001)) +
+#   scale_color_manual(values = species_pal)
+# 
+# fig8d <- ggplot(data=family_data_gen, aes(x=family, y=rate, fill=family, color=family)) +
+#   geom_boxplot(aes(alpha=0.6)) +
+#   labs(x=NULL, y=NULL) +
+#   theme_light() +
+#   theme(text = element_text(size = 14)) +
+#   scale_fill_manual(values=pnw_palette(n=6,name="Cascades")[c(1,4,5)]) +
+#   scale_color_manual(values=pnw_palette(n=6,name="Cascades")[c(1,4,5)]) +
+#   scale_alpha(guide="none") +
+#   theme(plot.margin = unit(c(10,30,0,0), 'pt'), axis.title.y = element_text(margin = margin(t=0,r=12,b=0,l=5)),
+#         axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0)), legend.position = "none") +
+#   new_scale_color() +
+#   geom_quasirandom(aes(color = species, dodge.width = 0.000001)) +
+#   scale_color_manual(values = species_pal) +
+#   scale_x_discrete(guide = guide_axis(n.dodge=2))
+# 
+# top <- wrap_elements((fig8a + inset_element(fig8ainset, 0.002, 0.61, 0.4, 0.99)) + (fig8c + inset_element(fig8cinset, 0.002, 0.002, 0.4, 0.35))) +
+#   labs(tag = "Infraorder") +
+#   theme(
+#     plot.tag = element_text(size = rel(1.3)),
+#     plot.tag.position = "bottom"
+#   )
+# 
+# bottom <- wrap_elements(fig8b + fig8d) +
+#   labs(tag = "Family") +
+#   theme(
+#     plot.tag = element_text(size = rel(1.3)),
+#     plot.tag.position = "bottom"
+#   )
+# 
+# left <- wrap_elements((fig8a + inset_element(fig8ainset, 0.002, 0.61, 0.4, 0.99))) +
+#   labs(tag = "Mutations/site/year") +
+#   theme(
+#     plot.tag = element_text(size = rel(1.3), angle = 90),
+#     plot.tag.position = "left"
+#   )
+# 
+# right <- wrap_elements((fig8c + inset_element(fig8cinset, 0.002, 0.002, 0.4, 0.35))) +
+#   labs(tag = "Mutations/site/generation") +
+#   theme(
+#     plot.tag = element_text(size = rel(1.3), angle = 90),
+#     plot.tag.position = "left"
+#   )
 
 mrate_life_lm_plot <- ggplot(data = species_mrate_gen) +
   geom_point(aes(x = lifespan, y = rate, color = infraorder), size = 3) +
@@ -446,13 +449,14 @@ mrate_life_lm_plot <- ggplot(data = species_mrate_gen) +
 ### Pipeline effects on mutation rate
 
 #### Reference species
-The reference genome used had the greatest overall magnitude of effect among all factors tested in this study (Figure 2, top). Reference genomes for this analysis were chosen to reflect three periods of evolutionary divergence: deep divergence, intermediate divergence, and recent divergence. Mutation rate per year was highest in most species when compared to the deep divergence reference genome. Alignment to the intermediate divergence reference genome resulted in the lowest mutation rate estimates across all species in the study, and alignment to the recent divergence reference genome resulted in mutation rate estimates that were between the deep and intermediate reference genomes in most cases. 
-
-Yearly mutation rate estimates did not differ significantly across mysticetes and odontocetes when aligned to the deep reference genomes, but did vary significantly when aligned to the intermediate and recently diverged genomes, with higher annual mutation rates in odontocetes than in mysticetes (Figure 2, bottom).
+The reference genome used had the greatest overall magnitude of effect among all factors tested in this study (Figure 1, Table 3). Reference genomes for this analysis were chosen to reflect three periods of evolutionary divergence: deep divergence, intermediate divergence, and recent divergence. Mutation rate per year was highest in most species when compared to the deep divergence reference genome. Alignment to the intermediate divergence reference genome resulted in the lowest mutation rate estimates across all species in the study, and alignment to the recent divergence reference genome resulted in mutation rate estimates that were between the deep and intermediate reference genomes in most cases. Yearly mutation rate estimates did not differ significantly across mysticetes and odontocetes when aligned to the deep reference genomes, but did vary significantly when aligned to the intermediate and recently diverged genomes, with higher annual mutation rates in odontocetes than in mysticetes (Figure 1).
 
 #### Chromosome position
 
-Mutation rates varied significantly among chromosomes across all species (Kruskal-Wallis p = `r round(kw_chrom$p.value, digits = 28)`). The mean range in mutation rates across chromosomes within each species (`r round(chrom_rate_range$mean, digits = 11)`) was higher than the range in mutation rates across all species included in the study (`r round(species_rate_range$ratediff, digits = 12)`. Among the 20 autosomal chromosomes and Chromosome X, mutation rate in Chromosomes 1, 4, 9, 16, and X was significantly lower than at least 1/3 of all chromosomes, and mutation rate in Chromosome 13 was significantly higer than at least 1/3 of all chromosomes (Figure 3). We also found that patterns in mutation rate variability among chromosomes was broadly consistent across species - i.e. in general, all of a species' chromosome mutation rates were generally on the high or low end of the spectrum, with minor variability in this pattern among species (Figure 3).
+Annual mutation rates varied significantly among chromosomes (Kruskal-Wallis p = `r round(kw_chrom$p.value, digits = 28)`). The range in mutation rates across chromosomes within each species (mean range = `r round(chrom_rate_range$mean, digits = 11)`) was larger than the range in whole genome mutation rates across all species included in the study (`r round(species_rate_range$ratediff, digits = 12)`. Chromosome-level mutation rate were significantly higher in at least half pairwise comparisons in chromosomes 15, 16, and 19. The mutation rate was significantly lower in chromosome X than all other chromosomes (Figure 3). Broadly, relative patterns in mutation rate were consistence across chromosomes, with odotoncete mutation rates higher than mysticete mutation rates in all chromosomes, while the Amazon river dolphin and long-finned pilot whale remained lower than all species across all chromosomes.
+
+#### Coding vs. non-coding regions
+Annual mutation rate estimates were significantly different in coding vs. noncoding regions (ANOVA p=`r round(summary(code_noncode_aov)[[1]][["Pr(>F)"]][1],digits = 8)`, F = `r round(summary(code_noncode_aov)[[1]][["F value"]][1],digits = 2)`,  Figure 3). Rates were higher in coding regions than non-coding regions across all species included in the study, increasing by an average of `r round(mean(coding_difference$diff_rate), digits = 12)` mutations/site/year (min = `r round(min(coding_difference$diff_rate), digits = 12)`, max = `r round(max(coding_difference$diff_rate), digits = 12)`). Similar to the relative patterns observed among chromosomes, relative mutation rates were similar in coding and non-coding regions, with most odontocetes having higher mutation rates than most mysticetes and the Amazon river dolphin and long-finned pilot whale having the lowest mutation rates in both regions.
 
 <br>
 
@@ -464,7 +468,7 @@ chromrate_plot <- mrate_by_chrom %>%
   left_join(species_mrate_year %>% dplyr::select(species, abbrev), by = c("species" = "abbrev")) %>% 
   rename("species_common" = "species.y") %>% 
 ggplot() +
-  geom_boxplot(aes(x=chrom,y=rate),color="grey50") +
+  geom_boxplot(aes(x=chrom,y=rate),color="grey50", outliers = FALSE) +
   geom_point(data=chrom_dunn_diff, aes(x=chrom2, y = y), shape = 8, size = 1.5, stroke = 1.1, color = "indianred3") +
   theme_light() +
   labs(x="Chromosome", y="Mutations/site/year") +
@@ -481,7 +485,7 @@ coderate_plot <- code_noncode_data %>%
   rename("species_common" = "species.y") %>% 
   filter(method == "noPI") %>% 
 ggplot(aes(x=snp_type,y=rate)) + 
-  geom_boxplot() +
+  geom_boxplot(outliers = FALSE) +
   theme_light() +
   labs(y="Mutations/site/year", x="Genome region") +
   scale_alpha(guide="none") +
@@ -498,121 +502,100 @@ chromrate_plot / coderate_plot + plot_layout(guides = "collect") & theme(legend.
 
 <br>
 
-#### Coding vs. non-coding regions
-Annual mutation rate estimates were significantly different in coding vs. noncoding regions (ANOVA p=`r round(summary(code_noncode_aov)[[1]][["Pr(>F)"]][1],digits = 8)`, F = `r round(summary(code_noncode_aov)[[1]][["F value"]][1],digits = 2)`,  Figure 4). Rates were higher in coding regions than non-coding regions across all species included in the study, increasing by an average of `r round(mean(coding_difference$diff_rate), digits = 12)` mutations/site/year (min = `r round(min(coding_difference$diff_rate), digits = 12)`, max = `r round(max(coding_difference$diff_rate), digits = 12)`).
-
-<br>
-
-<br>
-
 #### Genotyping read depth
 
-Across all species, mutation rate estimates increase rapidly with increasing maximum read depth threshold to an asymptotic maximum mutation rate estimate (Figure 5). Most species reached their asymptotic mutation rate at maximum read depth thresholds between 50 and 100 reads.
-
-<br>
-
-<br>
-
-```{r read_depth, fig.align = "center", fig.cap = "Figure 5. Top: Annual mutation rate (mutations/site/year) estimated with varying upper read depth thresholds for genotyping variants along the genome. Bottom: Proportion of variants within binned read depth threshold classes ranging from 10 to 500 reads."}
-
-ggplot(data = mrate_read_depth, aes(x=read_depth, y=rate))+
-  geom_point(aes(color = species),size = 0.5) +
-  #geom_smooth(color = "black") +
-  theme_minimal() +
-  scale_color_viridis(discrete = TRUE) +
-  xlab("Maximum read depth threshold") +
-  ylab("Mutations/site/year") +
-  theme(legend.position = "none")
-
-
-```
-<br>
-
-<br>
+Across all species, annual mutation rate estimates increase rapidly with increasing maximum read depth threshold to an asymptotic maximum mutation rate estimate (Figure 4). Most species reached their asymptotic mutation rate at maximum read depth thresholds between 50 and 150 reads. GAM modeling indicated that read depth was a significant predictor of mutation rate estimate (p < 0.0001), and a Kruskal-Wallis test confirmed that mutation rates varied significantly among read depth bins (e.g. 11-20, 21-30, ... 491-500). This effect was driven primarily by significant pairwise differences in read depth bins < 100 from read depth bins > 100. Similar to previous tests, relative patterns among species remained the same with increasing read depth. 
 
 #### Divergence date estimates
 
-Varying divergence date estimates also had a significant effect on annual mutation rate estimates, although the magnitude of the effect is smaller than the effect of reference genome or coding vs. non-coding regions (ANOVA p=`r round(summary(div_anova)[[1]][["Pr(>F)"]][1],digits = 2)`, F = `r round(summary(div_anova)[[1]][["F value"]][1],digits = 2)`,  Figure 6).
-
-<br>
-
-<br>
-
-```{r divergence, fig.align = "center", fig.cap = "Figure 6. Annual mutation rate (mutations/site/year) estimated using divergence times from Lloyd and Slater XXXX, McGowen et al. 2020, and Timetree.org."}
-
-ggplot(data = div_test_data, aes(x=div_est, y=rate, fill = div_est, color = div_est, alpha = 0.6)) +
-  geom_violin() +
-  theme_light() +
-  xlab("Divergence date estimate") +
-  ylab("Mutations/site/year") +
-  theme(text = element_text(size = 16)) +
-  scale_fill_manual(values=pnw_palette(n=5, name="Winter")) +
-  scale_color_manual(values=pnw_palette(n=5, name="Winter")) +
-  scale_alpha(guide="none") +
-  geom_quasirandom(dodge.width = 1, varwidth=TRUE, color = "black") +
-  theme(plot.margin = unit(c(10,30,0,0), 'pt'), axis.title.y = element_text(margin = margin(t=0,r=12,b=0,l=5)),
-        axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0)), legend.position = "none")
-
-```
-
-<br>
-
-<br>
+Varying divergence date estimates also had a significant effect on annual mutation rate estimates, although the magnitude of the effect is smaller than the effect of reference genome or coding vs. non-coding regions (ANOVA p=`r round(summary(div_anova)[[1]][["Pr(>F)"]][1],digits = 2)`, F = `r round(summary(div_anova)[[1]][["F value"]][1],digits = 2)`,  Figure 4). Divergence dates from Lloyd and Slater [-@lloyd_slater21] resulted in the highest within-group variability in mutation rate estimates among species, and relative mutation rates among species differed slightly among all three strata included in this test.
 
 #### Ancestral heterozygosity
-Varying ancestral heterozygosity also had a significant effect on annual mutation rate estimates (Kruskal-Wallis p=`r round(pi_kw$p.value,digits = 9)`,  Figure 7). This was driven by the group of mutation rates that were corrected for the maximum reported cetacean heterozygosity in Morin et al. (REF), which were significantly different from all other correction methods. We did not find any other significant differences across all other pairwise comparisons of correction methods. 
+
+Varying ancestral heterozygosity also had a significant effect on annual mutation rate estimates (Kruskal-Wallis p=`r round(pi_kw$p.value,digits = 9)`,  Figure 4). This was driven by the group of mutation rates that were corrected for using the maximum reported cetacean heterozygosity in Morin et al. (2025), which were significantly different from all other correction methods. We did not find any other significant differences across all other pairwise comparisons of correction methods. 
 
 <br>
 
 <br>
 
-```{r anc_het, fig.align="center", fig.cap = "Figure 7. Annual mutation rate (mutations/site/year) estimated using five approaches to accounting for ancestral heterozygosity: 1) no $\\pi_{anc}$, 2) $\\pi_{anc}$ equal to contemporary heterozygosity, 3) $\\pi_{anc}$ equal to maximum cetacean heterozygosity, 4) $\\pi_{anc}$ equal to mean cetacean heterozygosity, and 5) $\\pi_{anc}$ equal to minimum cetacean heterozygosity. Red stars indicate chromosomes that were significantly different in > 5 post hoc pairwise comparisons. "}
+```{r read_depth, fig.align = "center", fig.height = 5, fig.width = 10, fig.cap = "Figure 4. Left: Annual mutation rate (mutations/site/year) estimated with varying upper read depth thresholds for genotyping variants along the genome. Right top: Annual mutation rate (mutations/site/year) estimated using divergence times from Lloyd and Slater XXXX, McGowen et al. 2020, and Timetree.org. Right bottom: Annual mutation rate (mutations/site/year) estimated using five approaches to accounting for ancestral heterozygosity: 1) no $\\pi_{anc}$, 2) $\\pi_{anc}$ equal to contemporary heterozygosity, 3) $\\pi_{anc}$ equal to maximum cetacean heterozygosity, 4) $\\pi_{anc}$ equal to mean cetacean heterozygosity, and 5) $\\pi_{anc}$ equal to minimum cetacean heterozygosity. Red stars indicate chromosomes that were significantly different in > 5 post hoc pairwise comparisons."}
 
-ggplot(data = pi_test_data) +
-  geom_violin(aes(x=Pimethod, y=rate, fill = Pimethod, color = Pimethod), alpha = 0.6) +
+rd_mrate_plot <- ggplot(data = mrate_read_depth, aes(x=rd_start, y=rate))+
+  geom_line(aes(color = species.y),size = 0.5) +
+  #geom_smooth(color = "black") +
+  theme_light() +
+  guides(color = FALSE) +
+  xlab("Maximum read\ndepth threshold") +
+  ylab("Mutations/site/year") +
+  theme(legend.position = "none") +
+  theme(text = element_text(size = 14)) +
+  scale_color_manual(values = species_pal)
+
+div_mrate_plot <- ggplot(data = div_test_data, 
+                         aes(x=div_est, y=rate), alpha = 0.6) +
+  geom_boxplot(outliers = FALSE) +
+  theme_light() +
+  guides(color = FALSE) +
+  xlab("Divergence date estimate") +
+  ylab("Mutations/site/year") +
+  theme(text = element_text(size = 14)) +
+  geom_quasirandom(dodge.width = 1, varwidth=TRUE, aes(color = species)) +
+  theme(legend.position = "none") +
+  # theme(plot.margin = unit(c(10,30,0,0), 'pt'), axis.title.y = element_text(margin = margin(t=0,r=12,b=0,l=5)),
+  #       axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0)), legend.position = "none") +
+  scale_color_manual(values = species_pal)
+
+pi_mrate_plot <- ggplot(data = pi_test_data) +
+  geom_boxplot(aes(x=Pimethod, y=rate), alpha = 0.6, outliers = FALSE) +
   geom_point(pi_dunn_diff, mapping = aes(x=pi2, y = y), shape = 8, size = 1.5, stroke = 1.1, color = "indianred3") +
   theme_light() +
-  labs(x= expression(paste(pi[anc], " correction method")), y="Mutations/site/year") +
-  theme(text = element_text(size = 20)) +
-  scale_fill_manual(values=pnw_palette(n=5, name="Shuksan")) +
-  scale_color_manual(values=pnw_palette(n=5, name="Shuksan")) +
-  scale_alpha(guide="none") +
-  geom_quasirandom(aes(x=Pimethod, y=rate), dodge.width = 1, varwidth=TRUE, color = "black") +
-  theme(plot.margin = unit(c(10,30,0,0), 'pt'), axis.title.y = element_text(margin = margin(t=0,r=12,b=0,l=5)),
-        axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0)), legend.position = "none") +
-  scale_x_discrete(labels = c("noPI" = expression(paste("no ",pi)), 
-                              "PI" = expression(paste("species ",pi)), 
-                              "PIsummax" = expression(paste("max ",pi)), 
-                              "PIsummean" = expression(paste("mean ", pi)), 
-                              "PIsummin" = expression(paste("min ", pi))))
-  
-```
+  labs(x= expression(paste(pi[anc], "correction method")), y="Mutations/site/year") +
+  theme(text = element_text(size = 14)) +
+  theme(legend.position = "right", legend.title = element_blank()) +
+  geom_quasirandom(aes(x=Pimethod, y=rate, color = species), 
+                   dodge.width = 1, varwidth=TRUE) +
+  # theme(plot.margin = unit(c(10,30,0,0), 'pt'), axis.title.y = element_text(margin = margin(t=0,r=12,b=0,l=5)),
+  #       axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0)), legend.position = "none") +
+  # scale_x_discrete(labels = c("noPI" = expression(paste("no\n",pi)), 
+  #                             "PI" = expression(paste("species\n",pi)), 
+  #                             "PIsummax" = expression(paste("max\n",pi)), 
+  #                             "PIsummean" = expression(paste("mean\n", pi)), 
+  #                             "PIsummin" = expression(paste("min\n", pi)))) +
+  scale_x_discrete(labels = c("noPI" = "none", 
+                              "PI" = "species", 
+                              "PIsummax" = "max", 
+                              "PIsummean" = "mean", 
+                              "PIsummin" = "min")) +
+  scale_color_manual(values = species_pal)
 
+rd_mrate_plot + ((div_mrate_plot / pi_mrate_plot) + plot_layout(axis_titles = "collect_y")) + 
+  plot_layout(axis_titles = "collect_y") + plot_layout(guides = "collect") & theme(legend.position = 'right')
+
+```
 <br>
 
 <br>
 
 #### Comparison among all pipeline effects
 
-We can compare effect sizes ($\eta^2$) among all pipeline tests (Table 3) to determine which parameters have the greatest effect on mutation rate estimates. Variability in reference species led to the greatest effect size, and variability in phylogenetic distance to reference made up the majority of that effect. This was followed by variability among genomic locations (chromosomes) and coding vs. non-coding regions. Varying divergence time and the method for handling ancestral heterozygosity each had a comparatively modest effect on mutation rates, except when using the maximum value for ancestral heterozygosity reported by Morin et al. (REF).
+We can compare effect sizes ($\eta^2$) among strata for all pipeline tests (Table 3) to determine which parameters have the greatest effect on mutation rate estimates. Variability in reference species had the greatest effect on mutation rate estimates, and variability in phylogenetic distance to reference made up the majority of that effect. This was followed by variability among genomic locations (chromosomes) and coding vs. non-coding regions. Varying divergence time, maximum read depth, and the method for handling ancestral heterozygosity each had a comparatively modest effect on mutation rates, except when using the maximum value for ancestral heterozygosity reported by Morin et al. (2025).
 
 <br>
 
 <br>
 
-```{r comparison, fig.align = "center", fig.cap = "Table 3. Comparison of ANOVA F-ratios among all pipeline effects tested in this study."}
+```{r comparison, fig.align = "center", fig.width = 10, fig.cap = "Table 3. Effect sizes of each pipeline variable tested in the current study. Sizes range from 0-1."}
 
-effect_data <- data.frame("Pipeline effect" = c("reference distance", "reference species", "chromosome position", "coding/noncoding", "read depth", "divergence date", "$\\pi_{anc}$", "$\\pi_{anc}$ (ex max $\\pi_{anc}$)"), "eta" = unlist(c(round(effectsize::eta_squared(reference_anova, partial = FALSE)[2], digits = 2), round(effectsize::eta_squared(reference_anova_sp, partial = FALSE)[2], digits = 2), round(mrate_by_chrom %>% kruskal_effsize(rate~chrom) %>% pull(effsize), digits = 2), round(effectsize::eta_squared(code_noncode_aov, partial = FALSE)[2], digits = 2), "unknown", round(effectsize::eta_squared(div_anova, partial = FALSE)[2], digits = 2), round(pi_test_data %>% kruskal_effsize(rate~Pimethod) %>% pull(effsize), digits = 2), round(pi_test_nomax %>% kruskal_effsize(rate~Pimethod) %>% pull(effsize), digits = 2))))
+effect_data <- data.frame("Pipeline effect" = c("reference distance", "reference species", "chromosome position", "coding/noncoding", "read depth", "divergence date", "$\\pi_{anc}$", "$\\pi_{anc}$ (ex max $\\pi_{anc}$)"), "eta" = unlist(c(round(effectsize::eta_squared(reference_anova, partial = FALSE)[2], digits = 2), round(effectsize::eta_squared(reference_anova_sp, partial = FALSE)[2], digits = 2), round(mrate_by_chrom %>% kruskal_effsize(rate~chrom) %>% pull(effsize), digits = 2), round(effectsize::eta_squared(code_noncode_aov, partial = FALSE)[2], digits = 2), round(mrate_read_depth %>% kruskal_effsize(rate~rd_start) %>% pull(effsize), digits = 2), round(effectsize::eta_squared(div_anova, partial = FALSE)[2], digits = 2), round(pi_test_data %>% kruskal_effsize(rate~Pimethod) %>% pull(effsize), digits = 2), round(pi_test_nomax %>% kruskal_effsize(rate~Pimethod) %>% pull(effsize), digits = 2))))
 
 names(effect_data) <- c("Pipeline effect","$\\eta^2$")
-knitr::kable(effect_data, escape = FALSE)
+
+pander(effect_data, split.table = Inf, caption = "Table 3. Species abbreviation codes, genome source database, and accession number for each species used as a reference genome for alignment in this study.")
 ```
 
 <br>
 
 <br>
-
-
 
 ## Discussion {-}
 
@@ -632,17 +615,15 @@ In addition to the evolutionary and demographic effects we observed on mutation 
 
 The degree of variability driven by choice of reference genome - up to an order of magnitude in some cetacean species - brings with it the question of how to choose the correct reference genome for alignment of new genomic data. Because mutation rate estimates represent an average over the evolutionary time period since divergence from the reference species it may be best to choose a reference genome that reflects the time period of the question. For example, population genomics or other studies concerned with recent evolutionary time might choose a reference genome from a recently-diverged species, and estimate mutation rate based on the reference species for use in downstream analyses, e.g. PSMC or BEAST-generated divergence dates.
 
-Variability caused by reference genome was followed in effect size by the difference in mutation rate caused by corrections for ancestral heterozygosity and in coding vs. non-coding regions. Variation in divergence date estimates had comparatively minimal effect on mutation rate variability, which indicates a high level of precision and convergence among our current estimates of divergence dates among cetacean species.
+Compared to whole-genome mutation rate estimates among species and reference genomes, estimates of mutation rates among chromosomes varied less, but still significantly. The significantly lower mutation rate observed in Chromosome X is likely driven at least in part by its shorter residence time in males, which contribute more mutations to their offspring than females [@giannelli_green00; @nachman_crowell00]. Similarly, mutation rate estimates varied significantly between coding and non-coding regions. These results, taken together, suggest that mutation rate varies considerably throughout the genome, although potentially less-so that the variability in mutation rate over evolutionary time.
 
-Although not directly targeted by this study, we found that mutation rates for the same species, estimated using the same method, differ based on whether they are estimated annually vs. generationally, with potentially profound effects on downstream interpretation of evolutionary relationships or conservation applications. Recent disagreement about whether mutation rates in mysticetes are larger or smaller than odontocetes [e.g.,  @Jackson2009; @suarez-menendez_etal23] may be at least partially explained by differences in the use of annual vs. generational mutation rate, and future studies will need to carefully consider the implications of each of these for the interpretation of their results.
-
-Compared to whole-genome mutation rate estimates among species and reference genomes, estimates of mutation rates among chromosomes varied less, but still significantly. Chromosome X exhibited the highest variability, with a much lower mutation rate than other chromosomes. This is likely driven at least in part by its shorter residence time in males, which contribute more mutations to their offspring than females [@giannelli_green00; @nachman_crowell00]. Similarly, mutation rate estimates varied significantly between coding and non-coding regions. These results, taken together, suggest that mutation rate varies considerably throughout the genome, although potentially less-so that the variability in mutation rate over evolutionary time.
+Variability caused by pipeline parameters (i.e. read depth, divergence date, and ancestral heterozygosity) were among the smallest effect sizes in the study. The effect of maximum read depth was primarily limited to maximum read depths < 150. The plateau in mutation rates at maximum read depths > 150 indicates that false polymorphisms are not likely to be introduced by genotyping error in regions with anomalously high read depths (up to 500). Variation in divergence date estimates also had comparatively minimal effect on mutation rate variability, which indicates a high level of precision and convergence among our current estimates of divergence dates among cetacean species. However, divergence date was the only parameter to affect the relative position of species-specific mutation rate estimates, caused primarily by disagreement between published models and data regarding the divergence of Amazon river dolphin and long-finned pilot whale from the pygmy sperm whale.
 
 Correcting for species-specific ancestral heterozygosity has a linearly predictable effect on mutation rate, because $\pi_{anc}$ is simply subtracted from estimated genomic divergence before dividing by divergence time. We expect that subtracting any value from genomic divergence will cause a significant effect on the estimated mutation rate; the magnitude of the effect is determined by the size of $\pi_{anc}$. Our dataset confirmed this expectation. Further, we found that correcting for species-specific genomic heterozygosity was comparable with mean and minimum contemporary cetacean genomic heterozygosity; correcting for heterozygosity in this way has a minimal, but significant, effect on mutation rate estimates. However, our estimates of contemporary cetacean genomic heterozygosity ranged by over an order of magnitude (min = `r het_summary$min_pi`, max = `r het_summary$max_pi`), and correcting for ancestral heterozygosity using larger values had a much larger effect on mutation rate estimates. Because species-specific ancestral heterozygosity is currently unknowable, it is important to carefully consider whether and how to account for ancestral heterozygosity when estimating species-specific mutation rates, and to clearly describe this correction in the methods of genomic studies.
 
-Our study includes one species - the blue whale - for which pedigree-based mutation rate has also been estimated [@suarez-menendez_etal23]. Interestingly, the estimates of mutation rate most similar to pedigree-based estimates were obtained when sequences were aligned to the deeply-diverged hippopotamus ($\mu_{ped}$ = 1.24e-8, CI: 0.85-1.63e-8; $\mu_{phy}$ range: 1.31-1.47e-8). All estimates of generational whole genome mutation rate in blue whales, regardless of divergence date or ancestral heterozygosity, were within the 95% confidence interval of the estimate from Suarez-Menendez et al. [-@suarez-menendez_etal23]. Mutation rate estimates were lower when sequences were aligned to the intermediate and recently diverged reference species; however, given that these estimates were made using n=X pedigrees, it is possible that a large sample size might show greater variability in pedigree-based mutation rates.
+Although not directly targeted by this study, we found that mutation rates for the same species, estimated using the same method, differ based on whether they are estimated annually vs. generationally, with potentially profound effects on downstream interpretation of evolutionary relationships or conservation applications. Recent disagreement about whether mutation rates in mysticetes are larger or smaller than odontocetes [e.g.,  @Jackson2009; @suarez-menendez_etal23] may be at least partially explained by differences in the use of annual vs. generational mutation rate, and future studies will need to carefully consider the implications of each of these for the interpretation of their results.
 
- **More here, REFS from Suarez-Menendez et al and Bergeron et al, Sung et al.).** 
+Our study includes one species - the blue whale - for which pedigree-based mutation rate has also been estimated [@suarez-menendez_etal23]. Interestingly, the estimate of generational mutation rate most similar to pedigree-based estimates was obtained when blue whale sequence data was were aligned to the deeply-diverged hippopotamus ($\mu_{ped}$ = 1.24e-8, CI: 0.85-1.63e-8; mean hippo $\mu_{phy}$ = `r whole_mrate_data %>% filter(abbrev == "Bmus" & reference == "HipAmp" &time_step == "gen") %>% summarise(mean = mean(rate)) %>% pull(mean)`). All estimates of generational whole genome mutation rate in blue whales aligned to the North Atlantic right whale, regardless of divergence date or ancestral heterozygosity, were within the 95% confidence interval of the estimate from Suarez-Menendez et al. [-@suarez-menendez_etal23]. When aligned to the pygmy sperm whale, generational mutation rate estimates (mean $\mu_{phy}$ = `r whole_mrate_data %>% filter(abbrev == "Bmus" & reference == "Kbre" &time_step == "gen") %>% summarise(mean = mean(rate)) %>% pull(mean)`)) were just below the 95% confidence interval from Suarez-Menendez et al. [-@suarez-menendez_etal23]. Given that the estimates in Suarez-Menendez et al. [-@suarez-menendez_etal23] were made using only one pedigree, it is possible that adding additional pedigrees will increase variability in that estimate of mutation rate.
 
 ### Conclusions and Recommendations {-}
 
@@ -650,7 +631,7 @@ Species-specific mutation rates evolve over time; cetacean mutation rates are af
 
 ## ACKNOWLEDGEMENTS {-}
 
-We appreciate the expert input and review of early drafts of this manuscript by multiple colleagues, including Dr. Annabel Beichman and Dr. Michael McGowen.
+We appreciate the expert input and review of early drafts of this manuscript by multiple colleagues, including Dr. Annabel Beichman and Dr. Michael McGowen. High-quality genomic sequence data used in this study were made publicly available by the Cetacean Genomes Project in collaboration with the Vertebrate Genomes Project.
 
 ## REFERENCES {-#REFERENCES}
 <div id="refs"></div>
