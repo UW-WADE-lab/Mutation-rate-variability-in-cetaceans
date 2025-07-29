@@ -159,15 +159,33 @@ ggplot(data=mrate_by_chrom) +
   scale_linetype_discrete(labels=c('Odontocete nuclear\nmutation rate\n(Dornburg et al. 2012)'), 
                           name="Estimates")
 
-# Mean range in mutation rate variabilty among chromosomes
+# Mean range in mutation rate variabilty among chromosomes ---------------------
 chrom_rate_range <- mrate_by_chrom %>% 
     group_by(species) %>% 
     mutate(range = max(rate)-min(rate)) %>% 
     ungroup() %>% 
     summarise(mean = mean(range), max = max(range), min = min(range))
-  
+
+# Variability by chromosome size -----------------------------------------------
+
+chromfile <- chromfile %>% 
+  rownames_to_column("chrom_num")
+
+chrom_size_rate <- mrate_by_chrom %>% 
+  left_join(chromfile, by = c("chrom" = "chrom_num")) %>% 
+  rename("chrom_size" = RefSeq) %>% 
+  mutate(chrom_size = parse_number(chrom_size)) %>% 
+  filter(chrom != "X")
+
+sizerate_model <- lm(rate ~ chrom_size, data = chrom_size_rate)
+summary(sizerate_model)
+
+ggplot(data = chrom_size_rate, aes(x = chrom_size, y = rate)) +
+  geom_point() +
+  geom_smooth(method = "lm")
 
 save(chrom_rate_range, mrate_by_chrom, 
-     chrom_normality, chrom_dunn_diff, 
+     chrom_normality, chrom_dunn_diff,
+     chrom_size_rate, sizerate_model,
      kw_chrom, file = "mrate_by_chromosome.Rdata")
 
