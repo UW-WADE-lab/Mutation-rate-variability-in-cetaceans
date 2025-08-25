@@ -436,6 +436,16 @@ ggplot(data=mult_refs_gen, aes(x=reference, y=rate)) +
         axis.title.x = element_text(margin = margin(t=12,r=0,b=5,l=0))) +
   geom_point(size=2.7, alpha=0.75)
 
+#combine all mrates for McG, noPI
+
+mrate_supp <- bind_rows(species_mrate_year, species_mrate_gen, mult_refs_year, mult_refs_gen)
+
+write.csv(mrate_supp, file = "Supplementary Table S1.csv")
+
+mrate_mean <- mrate_supp %>% 
+  group_by(infraorder, reference, time_step) %>% 
+  summarise(mean_rate = mean(rate))
+
 #save dataframes
 save(species_mrate_gen, species_mrate_year, whole_mrate_data, mult_refs_gen, 
      sample_table_data, reference_table_data, species_rate_normality, ref_normality, reference_anova,
@@ -443,5 +453,6 @@ save(species_mrate_gen, species_mrate_year, whole_mrate_data, mult_refs_gen,
      mult_refs, mult_refs_year, div_anova, div_test_data, pi_kw, pi_dunn_diff, pi_test_data, family_data, family_data_gen,
      infraorder_anova_year, infraorder_anova_gen, infraorder_anova_gen_sub, infraorder_anova_year_sub,
      family_anova_gen, het_summary, pi_normality, div_normality,species_rate_range, pi_test_nomax,
+     mrate_mean, mrate_supp,
      file = "whole_mutation_rate_df.Rdata")
 

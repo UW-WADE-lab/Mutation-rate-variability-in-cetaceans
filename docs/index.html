@@ -12,7 +12,7 @@
 <meta name="author" content="Amy M. Van Cise1*, Sophia Garrote1, Phillip A. Morin2" />
 
 
-<title>Mutation rate variability in cetacean genomes</title>
+<title>Mutation rate evolution in cetacean genomes: understanding drivers of variability and observation bias in estimates of genomic mutation rate</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -371,8 +371,9 @@ display: none;
 
 
 
-<h1 class="title toc-ignore">Mutation rate variability in cetacean
-genomes</h1>
+<h1 class="title toc-ignore">Mutation rate evolution in cetacean
+genomes: understanding drivers of variability and observation bias in
+estimates of genomic mutation rate</h1>
 <h4 class="author">Amy M. Van Cise<sup>1*</sup>, Sophia
 Garrote<sup>1</sup>, Phillip A. Morin<sup>2</sup></h4>
 
@@ -449,35 +450,33 @@ posits that mutation rate increases with increasing metabolic rate
 (often proxied by body length) due to the oxidative effects of
 metabolism on the cell <span class="citation">(Martin and Palumbi
 1993)</span>.</p>
-<p>At a finer scale, substitution rate varies across the genome
-(e.g. among chromosomes and coding vs. non-coding regions), and
-site-specific variability is only partially context-dependent <span class="citation">(Ellegren, Smith, and Webster 2003; Hodgkinson and
-Eyre-Walker 2011)</span>. Substitution rate has been shown to vary over
+<p>At a finer scale, mutation rate varies across the genome (e.g. among
+chromosomes and coding vs. non-coding regions), and site-specific
+variability is only partially context-dependent <span class="citation">(Ellegren, Smith, and Webster 2003; Hodgkinson and
+Eyre-Walker 2011)</span>. Mutation rate has been shown to vary over
 evolutionary timescales <span class="citation">(Bergeron et al.
 2023)</span>. In addition to these factors, there are multiple decision
 points along the bioinformatic pipeline from sequence data to aligned
 genome that may affect the accurate tally of genomic mutations and
 downstream estimation of mutation rate. However, there is limited
-research on how the selection of evolutionary timescale, genomic reion,
-or alignment pipeline parameters affect estimates of substitution
-rate.</p>
-<p>Substitution rate estimates form the basis of many conservation
-genomic and evolutionary genomic studies; for example, as a parameter
-included in estimates of divergence among species, historic population
-size, or patterns of selective divergence as they relate neutral
-variation. Biases in this estimate may be reflected in many downstream
-analyses that shape our understanding of evolutionary biology; they may
-also affect conservation priorities and management actions. In one
-example example, a recent analysis of baleen whale mutation rates based
-on wild pedigrees indicates that mutation rates in these species are
-higher than estimated based on phylogenetic divergence; using the new
-mitochondrial mutation rate reduces estimates of pre-exploitation North
-Atlantic humpback whale abundance by 86% <span class="citation">(Suárez-Menéndez et al. 2023)</span> and considerably
-shifts our understanding of the recovery of that population. Possibly
-owing in part to the diversity of factors affection substitution rate,
-some studies suggest a lack of direct relationship between mtDNA genetic
-diversity and population size <span class="citation">Nabholz, Glémin,
-and Galtier (2009)</span>.</p>
+research on how the selection of evolutionary timescale, genomic region,
+or alignment pipeline parameters affect estimates of mutation rate.</p>
+<p>Mutation rate estimates form the basis of many conservation genomic
+and evolutionary genomic studies; for example, as a parameter included
+in estimates of divergence among species, historic population size, or
+patterns of selective divergence as they relate neutral variation.
+Biases in this estimate may be reflected in many downstream analyses
+that shape our understanding of evolutionary biology; they may also
+affect conservation priorities and management actions. In one example
+example, a recent analysis of baleen whale mutation rates based on wild
+pedigrees indicates that mutation rates in these species are higher than
+estimated based on phylogenetic divergence; using the new mitochondrial
+mutation rate reduces estimates of pre-exploitation North Atlantic
+humpback whale abundance by 86% <span class="citation">(Suárez-Menéndez
+et al. 2023)</span> and considerably shifts our understanding of the
+recovery of that population. Possibly owing in part to the diversity of
+factors affecting mutation rate, some studies suggest a lack of direct
+relationship between mtDNA genetic diversity and population size <span class="citation">Nabholz, Glémin, and Galtier (2009)</span>.</p>
 <p>The increasing accessibility of genomic sequencing technologies and
 high-quality reference genomes for marine mammals <span class="citation">(Morin et al. 2025; Morin et al. 2020)</span> has
 precipitated a rise in the use of genomic techniques to address
@@ -498,15 +497,25 @@ et al. 2009; Dornburg et al. 2012)</span>.</p>
 mutation rate within cetaceans, and describe the major drivers affecting
 that variability with the aim of providing insight and context for the
 estimation of an accurate and appropriate mutation rate across cetacean
-genomics studies. We examine process driven variability by estimating
-taxon- and chromosome-specific mutation rates, and comparing
-species-specific mutation rates with key demographic traits considered
-to affect mutation rate. We also examine potential drivers of
-observation error by varying key parameters in the pipeline used to
-align genomes and estimate a mutation rate. These input parameters
-include the choice of reference genome used for alignment, maximum read
-depth threshold for genotyping a locus, inclusion of coding or
-non-coding regions in the mutation rate estimate, divergence date
+genomics studies. Note that some harmful mutations will be filtered out
+of a population over time and therefore not accounted for in
+phylogeny-based estimates of mutation rate. We therefore estimate the
+substitution rate; i.e. the rate at which new mutations accumulate over
+time, which is considered equal to mutation rate in cases of neutral
+evolution and may be lower than mutation rate in cases of positive or
+stabilizing selection.</p>
+<p>To understand how evolutionary processes and observation bias affect
+contemporary estimates of substitution rate within cetaceans, we examine
+several factors related to each. First, we examine process driven
+variability by estimating taxon- and chromosome-specific substitution
+rates, and comparing species-specific substitution rates with key
+demographic traits considered to affect substitution rate (i.e.,
+longevity, generation time, and body length). We also examine potential
+drivers of observation error by varying key parameters in the pipeline
+used to align genomes and estimate a substitution rate. These input
+parameters include the choice of reference genome used for alignment,
+maximum read depth threshold for genotyping a locus, inclusion of coding
+or non-coding regions in the mutation rate estimate, divergence date
 estimate used in the mutation rate calculation, and whether or not
 ancestral heterozygosity is included in the mutation rate
 calculation.</p>
@@ -522,7 +531,7 @@ were obtained from NCBI Genbank using SRAToolkit (v. 3.0.7, <a href="https://git
 Nucleotide Archive (Table 1). Sequence files were quality filtered prior
 to formatted assemblyread mapping using BBduk in BBtools (<a href="https://jgi.doe.gov/data-and-tools/software-tools/bbtools/REF" class="uri">https://jgi.doe.gov/data-and-tools/software-tools/bbtools/REF</a>).</p>
 <p>In order to test for the effect of reference genome on the resulting
-mutation rate, we selected four reference genomes to represent three
+substitution rate, we selected four reference genomes to represent three
 divergence times: a deeply diverged taxon, a recently diverged taxon,
 and an intermediate taxon (Table 2). The deeply diverged taxon is
 represented by the hippopotamus (<em>Hippopotamus amphibius</em>,
@@ -853,13 +862,13 @@ alignment in this study.</caption>
 </div>
 <div id="sample-alignment" class="section level3 unnumbered">
 <h3 class="unnumbered">Sample alignment</h3>
-<p>All 19 genomic datasets were first aligned to the intermediate
-reference genome, the pygmy sperm whale. The alignment pipeline,
-regardless of sequencing approach, comprised six steps: 1) align sample
-genome to reference, 2) sort aligned genome, 3) remove duplicate
-sequences, 4) mask repeat regions, 5) index genome, 6) call genotypes
-and filter variants by read depth. All alignment scripts can be found at
-<a href="https://github.com/UW-WADE-lab/Whole-Genome-Alignment" class="uri">https://github.com/UW-WADE-lab/Whole-Genome-Alignment</a>.</p>
+<p>A total of 19 genomic datasets from 19 cetacean species were first
+aligned to the intermediate reference genome, the pygmy sperm whale. The
+alignment pipeline, regardless of sequencing approach, comprised six
+steps: 1) align sample genome to reference, 2) sort aligned genome, 3)
+remove duplicate sequences, 4) mask repeat regions, 5) index genome, 6)
+call genotypes and filter variants by read depth. All alignment scripts
+can be found at <a href="https://github.com/UW-WADE-lab/Whole-Genome-Alignment" class="uri">https://github.com/UW-WADE-lab/Whole-Genome-Alignment</a>.</p>
 <p>Step 1 differed for Illumina short-read and Arima Hi-C (Arima
 Genomics, Inc) sample data. We aligned forward and reverse reads from
 Illumina short-read data using bwa <span class="citation">(Li
@@ -888,11 +897,11 @@ reference (Table 1) using the pipeline described above. This resulted in
 a total of 3 sequence alignments for each of the 19 species included in
 the study. The pygmy sperm whale, North Atlantic right whale, and killer
 whale were each excluded from self-alignment, so that each of these
-three species have two alignments rathre than three.</p>
+three species have two alignments rather than three.</p>
 </div>
-<div id="data-analysis-calculating-mutation-rate" class="section level3 unnumbered">
-<h3 class="unnumbered">Data analysis: calculating mutation rate</h3>
-<p>Mutation rate (<span class="math inline">\(\mu\)</span>) can be
+<div id="data-analysis-calculating-substitution-rate" class="section level3 unnumbered">
+<h3 class="unnumbered">Data analysis: calculating substitution rate</h3>
+<p>Substitution rate (<span class="math inline">\(\mu\)</span>) can be
 estimated as genomic divergence (i.e. genomic heterozygosity, <span class="math inline">\(d_{xy}\)</span>) over divergence time (<span class="math inline">\(t\)</span>). Following Robinson et al. (2022), we
 use the following equation:</p>
 <p><span class="math display">\[\begin{equation}
@@ -907,38 +916,39 @@ turn, is estimated as:</p>
 in which the sample genome is heterozygous, <span class="math inline">\(h_2\)</span> is the number of sites in which the
 sample genome is homozygous for the alternate allele, and <span class="math inline">\(g\)</span> is the number of sites in which both
 the sample and reference genomes had called genotypes.</p>
-<p>This calculation may result in an overestimate of mutation rate
+<p>This calculation may result in an overestimate of substitution rate
 because ancestral (pre-divergence) heterozygosity is not taken into
 account, which we can account for in the following:</p>
 <p><span class="math display">\[\begin{equation}
     \mu=(d_{xy}-\pi_{anc})/2t
 \end{equation}\]</span></p>
-<p>The above equations produce a per-year mutation rate estimate.
-Mutation rates are often reported per generation in the literature, so
-to consider the effect of including generation time in mutation rate
-estimates we converted our per-year mutation rates to an estimate of
-mutation rate per generation. For most species, generation time was
-available from Taylor et al. <span class="citation">(2007, Table
-1)</span>.</p>
+<p>The above equations produce a per-year substitution rate estimate.
+Substitution rates are often reported per generation in the literature,
+so to consider the effect of including generation time in substitution
+rate estimates we converted our per-year substitution rates to an
+estimate of substitution rate per generation. For most species,
+generation time was available from Taylor et al. <span class="citation">(2007, Table 1)</span>. The published source of
+generation time for all species is listed in Supplemental Table S1.</p>
 </div>
 <div id="data-analysis" class="section level3">
 <h3>Data analysis</h3>
-<p>Computation of mutation rate, and all downstream data analyses, were
-completed in R <span class="citation">(R Core Team 2016)</span> using
-Rstudio (REF). We subset our mutation rate estimates according to each
-test described below. Unless otherwise noted below, for consistency
-among analyses we ensured that all datasets included genomes from all 19
-species considered in the study, using estimates only from reads aligned
-to the sperm whale reference genome, divergence date estimates from
-McGowen et al. <span class="citation">(2020)</span> (6-partition AR
-model), and without correcting for ancestral heterozygosity.</p>
+<p>Computation of substitution rate, and all downstream data analyses,
+were completed in R <span class="citation">(R Core Team 2016)</span>
+using Rstudio (REF). We subset our substitution rate estimates according
+to each test described below. Unless otherwise noted below, for
+consistency among analyses we ensured that all datasets included genomes
+from all 19 species considered in the study, using estimates only from
+reads aligned to the pygmy sperm whale reference genome, divergence date
+estimates from McGowen et al. <span class="citation">(2020)</span>
+(6-partition AR model), and without correcting for ancestral
+heterozygosity.</p>
 </div>
-<div id="data-analysis-pipeline-effects-on-mutation-rate" class="section level3 unnumbered">
-<h3 class="unnumbered">Data analysis: pipeline effects on mutation
+<div id="data-analysis-pipeline-effects-on-substitution-rate" class="section level3 unnumbered">
+<h3 class="unnumbered">Data analysis: pipeline effects on substitution
 rate</h3>
 <p>We first consider the effect of the following sources of potential
 variability in the genome alignment pipeline on downstream estimates of
-mutation rate:</p>
+substitution rate:</p>
 <ol style="list-style-type: decimal">
 <li>Choice of reference species for genomic alignment</li>
 <li>Chromosome position</li>
@@ -946,7 +956,7 @@ mutation rate:</p>
 <li>Maximum read depth cutoff for called genotypes</li>
 </ol>
 <p>We also consider the effect of variability in two estimated
-parameters that are used in the calculation of mutation rate:</p>
+parameters that are used in the calculation of substitution rate:</p>
 <ol style="list-style-type: decimal">
 <li>Choice of divergence date estimates</li>
 <li>Choice of whether and how to correct for ancestral
@@ -957,58 +967,62 @@ from deep, intermediate, and recently diverged reference species, we
 estimated a whole genome mutation rate (<span class="math inline">\(\mu\)</span>) following the approach outlined
 above. We used a Shapiro-Wilk normality test <span class="citation">(Royston 1982a, 1982b)</span> to determine that this
 dataset is normally distributed (p = 0.01). We then grouped whole genome
-mutation rates in two stratification schemes: four strata (by reference
-species) and three strata (by divergence time: deep divergence,
-intermediate divergence, and recent divergence), and used an ANOVA <span class="citation">(Hollander, Wolfe, and Chicken 2015)</span> analysis to
-determine whether mutation rate varies significantly among groups in
-either stratification scheme.</p>
+substitution rates in two stratification schemes: four strata (by
+reference species) and three strata (by divergence time: deep
+divergence, intermediate divergence, and recent divergence), and used an
+ANOVA <span class="citation">(Hollander, Wolfe, and Chicken 2015)</span>
+analysis to determine whether substitution rate varies significantly
+among groups in either stratification scheme.</p>
 <p><strong>Chromosome position:</strong> We indexed the genomic position
 of each chromosome using a bed file generated from the annotated pygmy
 sperm whale reference genome, extracted SNP data on a per-chromosome
-basis, and estimated a mutation rate (<span class="math inline">\(\mu\)</span>) for each chromosome of each genome
-included in the study. We used a Shapiro-Wilk normality test to
-determine that this mutation rate dataset is not normally distributed (p
-= 2.8^{-6}). We therefore used a non-parametric Kruskal-Wallis analysis
-(REF) to determine whether mutation rate varies significantly among
-chromosomes across all 14 species included in the study, and a post hoc
-Dunn test (REF) to identify chromosomes driving any signal of
-differentiation.</p>
+basis, and estimated a substitution rate (<span class="math inline">\(\mu\)</span>) for each chromosome of each genome
+included in the study as described above. We used a Shapiro-Wilk
+normality test to determine that this substitution rate dataset is not
+normally distributed (p = 2.8^{-6}). We therefore used a non-parametric
+Kruskal-Wallis analysis (REF) to determine whether substitution rate
+varies significantly among chromosomes across 18 species included in the
+study (excluding pygmy sperm whale), and a post hoc Dunn test (REF) to
+identify chromosomes driving any signal of differentiation. Finally, we
+tested for a relationship between chromosome-level substitution rates
+across species and chromosome length using a linear regression.</p>
 <p><strong>Inclusion of coding vs non-coding regions:</strong> We
 indexed the genomic position of coding and non-coding regions using a
 bed file generated from the annotated pygmy sperm whale reference
-genome, extracted SNP data in each region, and estimated mutation rates
-(<span class="math inline">\(\mu\)</span>) in coding and non-coding
-regions of each genome included in the study. We used a Shapiro-Wilk
-normality test to determine that this mutation rate dataset is normally
-distributed (p = 0.03). We then used an ANOVA to compare mutation rate
-estimates between these two regions across all fourteen species included
-in the study.</p>
+genome, extracted SNP data in each region, and estimated substitution
+rates (<span class="math inline">\(\mu\)</span>) in coding and
+non-coding regions of each genome included in the study. We used a
+Shapiro-Wilk normality test to determine that this substitution rate
+dataset is normally distributed (p = 0.03). We then used an ANOVA to
+compare substitution rate estimates between these two regions across 18
+species, excluding the pygmy sperm whale.</p>
 <p><strong>Maximum read-depth cutoff:</strong> We first grouped all
 mutations into bins between read depths of 11-500 reads (i.e. 11-20,
-21-30, … 491-500) and calculated the cumulative number of mutations at
-each depth bin. Following this, we calculated mutation rate (<span class="math inline">\(\mu\)</span>) for each species at maximum read
-depth cutoffs from 10-500. Finally, we use a generalized additive
-regression to test whether read depth is a significant driver of
-mutation rate estimates and a Kruskal-Wallis test to estimate the size
-of the effect of read depth on mutation rate estimates.</p>
+21-30, … 491-500) and calculated the cumulative number of substitutions
+at each depth bin. Following this, we calculated substitution rate
+(<span class="math inline">\(\mu\)</span>) for each species at maximum
+read depth cutoffs from 10-500. Finally, we use a generalized additive
+model to test whether read depth is a significant driver of variability
+substitution rate estimates and a Kruskal-Wallis test to estimate the
+size of the effect of read depth on substitution rate estimates.</p>
 <p><strong>Divergence date estimates:</strong> We generated estimates of
-mutation rate (<span class="math inline">\(\mu\)</span>) using
+substitution rate (<span class="math inline">\(\mu\)</span>) using
 fossil-dated divergence times (<span class="math inline">\(t\)</span>)
 from McGowen et al. <span class="citation">(2020)</span> (6-partition AR
 model) and Lloyd and Slater <span class="citation">(2021)</span> (SAFE
 metatree analysis), as well as an average across all published
 divergence times from TimeTree [timetree.org; <span class="citation">Kumar et al. (2017)</span>; Supplemental Table S1]. We
-then re-estimated whole genome mutation rate using each of the
+then re-estimated whole genome substitution rate using each of the
 species-specific divergence dates. We used a Shapiro-Wilk normality test
-to determine that this mutation rate dataset is normally distributed (p
-= 0.15) and used an ANOVA to compare mutation rate differentiation
-across the three strata.</p>
+to determine that this substitution rate dataset is normally distributed
+(p = 0.15) and used an ANOVA to compare substitution rate
+differentiation across the three strata.</p>
 <p><strong>Ancestral heterozygosity:</strong> Because the ancestral
 heterozygosity (<span class="math inline">\(\pi_{anc}\)</span>) of a
 species is unknown and unknowable using currently available technology,
-we generated mutation rate estimates under five different states of
+we generated substitution rate estimates under five different states of
 <span class="math inline">\(\pi_{anc}\)</span>. First, we estimated
-mutation rate (<span class="math inline">\(\mu\)</span>) without
+substitution rate (<span class="math inline">\(\mu\)</span>) without
 correcting for <span class="math inline">\(\pi_{anc}\)</span>, and by
 correcting for <span class="math inline">\(\pi_{anc}\)</span> under the
 assumption that the contemporary genomic heterozygosity of each species
@@ -1019,53 +1033,52 @@ sensitivity of our estimates of <span class="math inline">\(\mu\)</span>
 to a range of values of <span class="math inline">\(\pi_{anc}\)</span>
 by re-estimating <span class="math inline">\(\mu\)</span> for every
 species using the maximum and minimum reported values of <span class="math inline">\(\pi_{anc}\)</span> within cetaceans from Morin et
-al. (in prep).We used a Shapiro-Wilk normality test to determine that
+al. (in prep). We used a Shapiro-Wilk normality test to determine that
 this mutation rate dataset is not normally distributed (p = 3.29^{-5})
 and used a non-parametric Kruskal-Wallis test with an ad hoc Dunn test
-and Bonferroni correction to compare mutation rate differentiation
+and Bonferroni correction to compare substitution rate differentiation
 across the five different <span class="math inline">\(\pi_{anc}\)</span>
 estimates.</p>
 </div>
-<div id="data-analysis-phylogenetic-or-demographic-effects-on-mutation-rate" class="section level3 unnumbered">
+<div id="data-analysis-phylogenetic-or-demographic-effects-on-substitution-rate" class="section level3 unnumbered">
 <h3 class="unnumbered">Data analysis: phylogenetic or demographic
-effects on mutation rate</h3>
-<p>To examine the effect of phylogenetic inertia on mutation rate, we
-test for significant differentiation among taxonomic families in
-whole-genome mutation rate per year (mutations/site/year) as well as
-whole-genome mutation rate per generation (mutations/site/generation).
-We also test for rate differentiation among three families for which we
-have more than one species: Balaenopteridae, Delphinidae, and
-Ziphiidae.</p>
+effects on substitution rate</h3>
+<p>To examine the effect of phylogenetic inertia on substitution rate,
+we test for significant differentiation among taxonomic families in
+whole-genome substitution rate per year (substitution/site/year) as well
+as whole-genome substitution rate per generation
+substitution/site/generation) using an ANOVA. We compared observed
+patterns using both annual and generational estimates of mutation rate
+because they are both commonly reported in marine mammal genomic
+literature <span class="citation">(e.g. Jackson et al. 2009;
+Suárez-Menéndez et al. 2023)</span>.</p>
 <p>We also consider potential effects of lifespan and body size on
-whole-genome mutation rate using data on species-specific maximum
-lifespan and maximum body length. Most of these data were acquired from
-Groot et al. <span class="citation">(2023)</span>, and missing data were
-filled in from published literature (Table 1, Supplemental Table S1). We
-first tested for correlation between maximum lifespan and maximum body
-length, and found them to be correlated in our dataset (Spearman’s <span class="math inline">\(\rho\)</span> = 0.83). Next, we fit generalized
-linear regressions considering all possible combinations of these three
-demographic parameters using the PGLS modeling approach described above
-(genotype read-depth section).</p>
-<p>For each of these tests, we compared observed patterns using both
-annual and generational estimates of mutation rate, which are both
-commonly reported in marine mammal genomic literature <span class="citation">(e.g. Jackson et al. 2009; Suárez-Menéndez et al.
-2023)</span>.</p>
+annual whole-genome substitution rate using data on species-specific
+maximum lifespan and maximum body length. Most of these data were
+acquired from Groot et al. <span class="citation">(2023)</span>, and
+missing data were filled in from published literature (Table 1,
+Supplemental Table S1). We first tested for correlation between maximum
+lifespan and maximum body length, and found them to be correlated in our
+dataset (Spearman’s <span class="math inline">\(\rho\)</span> = 0.83).
+Next, we fit a generalized linear regression using both maximum lifespan
+and maximum body length as predictor variables, following the PGLS
+modeling approach described above (genotype read-depth section).</p>
 </div>
 </div>
 <div id="results" class="section level2 unnumbered">
 <h2 class="unnumbered">Results</h2>
 <p>For each combination of species and reference genome, we generated 18
-estimates of whole-genome mutation rate by varying estimates of
+estimates of whole-genome substitution rate by varying estimates of
 divergence date, ancestral heterozygosity, and annual vs. generational
-mutation rate estimates. Using the pygmy sperm whale reference genome,
-divergence date from McGowen et al. <span class="citation">(2020)</span>, and without correcting for ancestral
-heterozygosity, we also generated an estimate of mutation rate at each
-chromosome (n = 20 per species), in both coding and non-coding regions
-(n = 2 per species), and at maximum read depths of 100-500 (n = 50 per
-species).</p>
-<p>Whole genome mutation rate varies among individual species included
-in the study; rates largely fall between previously published average
-estimates for mysticetes and odontocetes (Figure 1).</p>
+substitution rate estimates. Using the pygmy sperm whale reference
+genome, divergence date from McGowen et al. <span class="citation">(2020)</span>, and without correcting for ancestral
+heterozygosity, we also generated an estimate of substitution rate at
+each chromosome (n = 21 per species), in both coding and non-coding
+regions (n = 2 per species), and at maximum read depths of 100-500 (n =
+50 per species).</p>
+<p>Whole genome substitution rate varies among individual species
+included in the study; rates largely fall between previously published
+average estimates for mysticetes and odontocetes (Figure 1).</p>
 <p><br></p>
 <p><br></p>
 <div class="figure" style="text-align: center">
@@ -1082,33 +1095,34 @@ odontocetes (blue) and mysticetes (yellow) across three divergence time
 strata.
 </p>
 </div>
-<div id="phylogenetic-or-demographic-effects-on-mutation-rate" class="section level3">
-<h3>Phylogenetic or demographic effects on mutation rate</h3>
-<p>We first examined the effect of phylogenetic inertia on mutation
-rate, and found that annual mutation rate was significantly different
-between the two cetacean infraorders (ANOVA p = 0.077, F = 3.57, Figure
-2a) and accounts for approximately 18% of annual mutation rate
-variability, with mutation rates that were significantly lower in
-mysticetes than in odontocetes.</p>
-<p>We then re-analyzed mutation rate between infraorders using
-generational mutation rates, and found no significant differentiation
-(ANOVA p = 0.15, Figure 2b). Further, the observed pattern in mutation
-rate differentiation between infraorders is flipped, with a higher mean
-generational mutation rate in the mysticetes than in the
-odontocetes.</p>
+<div id="phylogenetic-or-demographic-effects-on-substitution-rate" class="section level3">
+<h3>Phylogenetic or demographic effects on substitution rate</h3>
+<p>We first examined the effect of phylogenetic inertia on substitution
+rate, and found that annual substitution rate was significantly
+different between the two cetacean infraorders (ANOVA p = 0.077, F =
+3.57, Figure 2) and accounts for approximately 18% of annual
+substitution rate variability, with substitution rates that were
+significantly lower in mysticetes than in odontocetes.</p>
+<p>We then re-analyzed substitution rate between infraorders using
+generational substitution rates, and found no significant
+differentiation (ANOVA p = 0.15, Figure 2). Further, the observed
+pattern in substitution rate differentiation between infraorders is
+flipped, with a higher mean generational substitution rate in the
+mysticetes than in the odontocetes.</p>
 <p>When examining the effect of maximum lifespan, asymptotic length, and
-generation time on annual mutation rate, while controlling for
+generation time on annual substitution rate, while controlling for
 phylogenetic inertia, the model with the lowest AIC included only
 lifespan but it was not a significant parameter (p = 0.97). However,
-when considering generational mutation rate for maximum lifespan and
-asymptotic length only - again controlling for phylogenetic inertia - we
-found that the AIC-selected model included a significant positive effect
-of maximum lifespan (p = 1.4^{-5}, Figure 2c), such that generational
-mutation rate increases with increasing maximum lifespan. Models
-including asymptotic length had higher AIC values than the model with
-lifespan as the only parameter; it follows that asymptotic length was
-not a significant predictor of mutation rate when considered as the only
-model parameter or in combination with maximum lifespan.</p>
+when considering generational substitution rate using maximum lifespan
+and asymptotic length as the predictor variables - again controlling for
+phylogenetic inertia - we found that the AIC-selected model included a
+significant positive effect of maximum lifespan (p = 1.4^{-5}, Figure
+2), such that generational substitution rate increases with increasing
+maximum lifespan. Models including asymptotic length had higher AIC
+values than the model with lifespan as the only parameter; it follows
+that asymptotic length was not a significant predictor of generational
+substitution rate when considered as the only model parameter or in
+combination with maximum lifespan.</p>
 <p><br></p>
 <p><br></p>
 <div class="figure" style="text-align: center">
@@ -1126,25 +1140,25 @@ species’ asymptotic lifespan.
 <p><br></p>
 <p><br></p>
 </div>
-<div id="pipeline-effects-on-mutation-rate" class="section level3">
-<h3>Pipeline effects on mutation rate</h3>
+<div id="pipeline-effects-on-substitution-rate" class="section level3">
+<h3>Pipeline effects on substitution rate</h3>
 <div id="reference-species" class="section level4">
 <h4>Reference species</h4>
 <p>The reference genome used had the greatest overall magnitude of
 effect among all factors tested in this study (Figure 1, Table 3).
 Reference genomes for this analysis were chosen to reflect three periods
 of evolutionary divergence: deep divergence, intermediate divergence,
-and recent divergence. Mutation rate per year was highest in most
+and recent divergence. Substitution rate per year was highest in most
 species when compared to the deep divergence reference genome. Alignment
 to the intermediate divergence reference genome resulted in the lowest
-mutation rate estimates across all species in the study, and alignment
-to the recent divergence reference genome resulted in mutation rate
-estimates that were between the deep and intermediate reference genomes
-in most cases. Yearly mutation rate estimates did not differ
-significantly across mysticetes and odontocetes when aligned to the deep
-reference genomes, but did vary significantly when aligned to the
-intermediate and recently diverged genomes, with higher annual mutation
-rates in odontocetes than in mysticetes (Figure 1).</p>
+substitution rate estimates across all species in the study, and
+alignment to the recent divergence reference genome resulted in
+substitution rate estimates that were between the deep and intermediate
+reference genomes in most cases. Yearly substitution rate estimates did
+not differ significantly across mysticetes and odontocetes when aligned
+to the deep reference genomes, but did vary significantly when aligned
+to the intermediate and recently diverged genomes, with higher annual
+substitution rates in odontocetes than in mysticetes (Figure 1).</p>
 </div>
 <div id="chromosome-position" class="section level4">
 <h4>Chromosome position</h4>
@@ -1166,16 +1180,16 @@ correlated significantly with chromosome size (linear regression p &lt;
 </div>
 <div id="coding-vs.-non-coding-regions" class="section level4">
 <h4>Coding vs. non-coding regions</h4>
-<p>Annual mutation rate estimates were significantly different in coding
-vs. noncoding regions (ANOVA p=0, F = 63.13, Figure 3). Rates were
-higher in coding regions than non-coding regions across all species
+<p>Annual substitution rate estimates were significantly different in
+coding vs. noncoding regions (ANOVA p=0, F = 63.13, Figure 3). Rates
+were higher in coding regions than non-coding regions across all species
 included in the study, increasing by an average of 5.7^{-11}
-mutations/site/year (min = 4.8^{-11}, max = 6.4^{-11}). Similar to the
-relative patterns observed among chromosomes, relative mutation rates
-were similar in coding and non-coding regions, with most odontocetes
-having higher mutation rates than most mysticetes and the Amazon river
-dolphin and long-finned pilot whale having the lowest mutation rates in
-both regions.</p>
+substitution/site/year (min = 4.8^{-11}, max = 6.4^{-11}). Similar to
+the relative patterns observed among species’ chromosome-level
+substitution rates, relative substitution rates were similar in coding
+and non-coding regions, with most odontocetes having higher substitution
+rates than most mysticetes and the Amazon river dolphin and long-finned
+pilot whale having the lowest substitution rates in both regions.</p>
 <p><br></p>
 <p><br></p>
 <div class="figure" style="text-align: center">
@@ -1367,109 +1381,109 @@ estimates integrated over deep evolutionary time were not significantly
 different between the two cetacean infraorders, but a pattern of
 differentiation emerges when considering intermediate divergence time
 and increases in magnitude in recent divergence time (Figure 2B).</p>
-<p>Among pipeline effects on mutation rate, the choice of reference
-genome had the greatest effect on species-specific estimates of whole
-genome mutation rate, and the time since divergence from the reference
-genome made up a large portion of this variability. To our knowledge,
-this is the first report of a difference in mutation rate estimates
-based on the choice of reference sequence. Reference-driven differences
-in mutation rate observed in this study may be caused by several
-factors. Our results suggest that mutation rate accelerates and slows
-over time, and that cetacean mutation rates were higher in deep
-evolutionary time, slowed in mid-evolutionary time, and are marginally
-higher in shallow or contemporary evolutionary time. By comparing this
-pattern in mysticetes and odontocetes, we observed that the annual
-mutation rates of these two evolutionary lineages was not significantly
-different over deep evolutionary time, but differed significantly over
-intermediate and recent evolutionary time (Figure 1), suggesting that
-the annual mutation rates of each of these families may have embarked on
-differing evolutionary trajectories once the two families split from
-each other, resulting in the significantly lower annual mutation rates
-observed in contemporary mysticetes than in contemporary odontocetes
-(Figure 8a).</p>
 </div>
 <div id="logistical-considerations" class="section level3 unnumbered">
 <h3 class="unnumbered">Logistical considerations</h3>
 <p>In addition to the evolutionary and demographic effects we observed
-on mutation rate, we found that many pipeline parameters can affect
-mutation rate estimates. In general, altering pipeline parameters tended
-to shift all estimates of mutation rate in the same direction, with
-minimal observed shifts in the relative position of mutation rates among
-species.</p>
+on substitution rate, we found that many pipeline parameters can affect
+substitution rate estimates. In general, altering pipeline parameters
+tended to shift all estimates of substitution rate in the same
+direction, with minimal observed shifts in the relative position of
+substitution rates among species.</p>
+<p>Among pipeline effects on substitution rate, the choice of reference
+genome had the greatest effect on species-specific estimates of whole
+genome substitution rate, and the time since divergence from the
+reference genome made up a large portion of this variability. To our
+knowledge, this is the first report of a difference in substitution rate
+estimates based on the choice of reference sequence. Reference-driven
+differences in substitution rate observed in this study may be caused by
+several factors. Our results suggest that mutation rate accelerates and
+slows over time, and that cetacean mutation rates were higher in deep
+evolutionary time, slowed in mid-evolutionary time, and are marginally
+higher in shallow or contemporary evolutionary time. By comparing this
+pattern in mysticetes and odontocetes, we observed that the annual
+substitution rates of these two evolutionary lineages was not
+significantly different over deep evolutionary time, but differed
+significantly over intermediate and recent evolutionary time (Figure 1),
+suggesting that the annual substitution rates of each of these
+infraorders may have embarked on differing evolutionary trajectories
+once they split from each other, resulting in the significantly lower
+annual substitution rates observed in contemporary mysticetes than in
+contemporary odontocetes.</p>
 <p>The degree of variability driven by choice of reference genome - up
 to an order of magnitude in some cetacean species - brings with it the
 question of how to choose the correct reference genome for alignment of
-new genomic data. Because mutation rate estimates represent an average
-over the evolutionary time period since divergence from the reference
-species it may be best to choose a reference genome that reflects the
-time period of the question. For example, population genomics or other
-studies concerned with recent evolutionary time might choose a reference
-genome from a recently-diverged species, and estimate mutation rate
-based on the reference species for use in downstream analyses, e.g. PSMC
-or BEAST-generated divergence dates.</p>
-<p>Compared to whole-genome mutation rate estimates among species and
-reference genomes, estimates of mutation rates among chromosomes varied
-less, but still significantly. This variability in substitution rate
-among chromosomes was driven at least in part by chromosome size, with a
+new genomic data. Because substitution rate estimates represent an
+average over the evolutionary time period since divergence from the
+reference species it may be best to choose a reference genome that
+reflects the time period of the question. For example, population
+genomics or other studies concerned with recent evolutionary time might
+choose a reference genome from a recently-diverged species, and estimate
+substitution rate based on the reference species for use in downstream
+analyses, e.g. PSMC or BEAST-generated divergence dates.</p>
+<p>Compared to whole-genome substitution rate estimates among reference
+genomes, estimates of substitution rates among chromosomes varied less,
+but still significantly. This variability in substitution rate among
+chromosomes was driven at least in part by chromosome size, with a
 pattern of lower substitution rates in larger chromosomes that has been
 observed in other taxa as well <span class="citation">(Künstner et al.
-2010)</span>. The significantly lower mutation rate observed in
+2010)</span>. The significantly lower substitution rate observed in
 Chromosome X is likely driven at least in part by its shorter residence
 time in males, which contribute more mutations to their offspring than
 females <span class="citation">(Giannelli and Green 2000; Nachman and
 Crowell 2000)</span>. Interestingly, the opposite pattern is observed in
 birds, where the Z chromosome that has a shorter residence time in
-females nontheless has a higher mutation rate than autosomal chromosomes
-<span class="citation">(Zhang et al. 2014)</span>. Finally, we observed
-higher substitution rates in coding regions than non-coding regions.
-These results, taken together, highlight the importance of choosing
-appropriate genomic regions when estimating mutation rates for use in
-conservation or evolutionary genomic studies.</p>
-<p>Variability caused by pipeline parameters (i.e. read depth,
+females nonetheless has a higher mutation rate than autosomal
+chromosomes <span class="citation">(Zhang et al. 2014)</span>. Finally,
+we observed higher substitution rates in coding regions than non-coding
+regions. These results, taken together, highlight the importance of
+choosing appropriate genomic regions when estimating mutation rates for
+use in conservation or evolutionary genomic studies.</p>
+<p>Variability caused by other pipeline parameters (i.e. read depth,
 divergence date, and ancestral heterozygosity) were among the smallest
 effect sizes in the study. The effect of maximum read depth was
 primarily limited to maximum read depths &lt; 150. The plateau in
-mutation rates at maximum read depths &gt; 150 indicates that false
+substitution rates at maximum read depths &gt; 150 indicates that false
 polymorphisms are not likely to be introduced by genotyping error in
 regions with anomalously high read depths (up to 500). Variation in
 divergence date estimates also had comparatively minimal effect on
-mutation rate variability, which indicates a high level of precision and
-convergence among our current estimates of divergence dates among
+substitution rate variability, which indicates a high level of precision
+and convergence among our current estimates of divergence dates among
 cetacean species. However, divergence date was the only parameter to
 affect the relative position of species-specific mutation rate
 estimates, caused primarily by disagreement between published models and
 data regarding the divergence of Amazon river dolphin and long-finned
 pilot whale from the pygmy sperm whale.</p>
 <p>Correcting for species-specific ancestral heterozygosity has a
-linearly predictable effect on mutation rate, because <span class="math inline">\(\pi_{anc}\)</span> is simply subtracted from
+linearly predictable effect on substitution, because <span class="math inline">\(\pi_{anc}\)</span> is simply subtracted from
 estimated genomic divergence before dividing by divergence time. We
 expect that subtracting any value from genomic divergence will cause a
-significant effect on the estimated mutation rate; the magnitude of the
-effect is determined by the size of <span class="math inline">\(\pi_{anc}\)</span>. Our dataset confirmed this
+significant effect on the estimated substitution rate; the magnitude of
+the effect is determined by the size of <span class="math inline">\(\pi_{anc}\)</span>. Our dataset confirmed this
 expectation. Further, we found that correcting for species-specific
 genomic heterozygosity was comparable with mean and minimum contemporary
 cetacean genomic heterozygosity; correcting for heterozygosity in this
-way has a minimal, but significant, effect on mutation rate estimates.
-However, our estimates of contemporary cetacean genomic heterozygosity
-ranged by over an order of magnitude (min = 1.1^{-4}, max = 0.005037),
-and correcting for ancestral heterozygosity using larger values had a
-much larger effect on mutation rate estimates. Because species-specific
-ancestral heterozygosity is currently unknowable, it is important to
-carefully consider whether and how to account for ancestral
-heterozygosity when estimating species-specific mutation rates, and to
-clearly describe this correction in the methods of genomic studies.</p>
-<p>Although not directly targeted by this study, we found that mutation
-rates for the same species, estimated using the same method, differ
-based on whether they are estimated annually vs. generationally, with
-potentially profound effects on downstream interpretation of
-evolutionary relationships or conservation applications. Recent
-disagreement about whether mutation rates in mysticetes are larger or
-smaller than odontocetes <span class="citation">(e.g., Jackson et al.
-2009; Suárez-Menéndez et al. 2023)</span> may be at least partially
-explained by differences in the use of annual vs. generational mutation
-rate, and future studies will need to carefully consider the
-implications of each of these for the interpretation of their
-results.</p>
+way has a minimal, but significant, effect on substitution rate
+estimates. However, our estimates of contemporary cetacean genomic
+heterozygosity ranged by over an order of magnitude (min = 1.1^{-4}, max
+= 0.005037), and correcting for ancestral heterozygosity using larger
+values had a much larger effect on substitution rate estimates. Because
+species-specific ancestral heterozygosity is currently unknowable, it is
+important to carefully consider whether and how to account for ancestral
+heterozygosity when estimating species-specific substitution rates, and
+to clearly describe this correction in the methods of genomic
+studies.</p>
+<p>Although not directly targeted by this study, we found that
+substitution rates for the same species, estimated using the same
+method, differ based on whether they are estimated annually
+vs. generationally, with potentially profound effects on downstream
+interpretation of evolutionary relationships or conservation
+applications. Recent disagreement about whether mutation rates in
+mysticetes are larger or smaller than odontocetes <span class="citation">(e.g., Jackson et al. 2009; Suárez-Menéndez et al.
+2023)</span> may be at least partially explained by differences in the
+use of annual vs. generational mutation rate, and future studies will
+need to carefully consider the implications of each of these for the
+interpretation of their results.</p>
 </div>
 <div id="subsitution-rate-vs.-pedigree-based-mutation-rate-estimates" class="section level3 unnumbered">
 <h3 class="unnumbered">Subsitution rate vs. pedigree-based mutation rate
@@ -1520,10 +1534,10 @@ Suarez-Menendez et al. <span class="citation">(2023)</span> were made
 using only one pedigree, it is possible that adding additional pedigrees
 will increase variability in pedigree-based estimates of mutation
 rate.</p>
-<p>Similarly, across 5 humpback whale pedigrees, Suarez-Menendez et al.
-<span class="citation">(2023)</span> estimated a pedigree-based mutation
-rate of 1.12 × 10<sup>−8</sup> (CI: 0.94 × 10<sup>−8</sup> to 1.30 ×
-10<sup>−8</sup>). Again, the mean phylogeny-based generational
+<p>Similarly, across five humpback whale pedigrees, Suarez-Menendez et
+al. <span class="citation">(2023)</span> estimated a pedigree-based
+mutation rate of 1.12 × 10<sup>−8</sup> (CI: 0.94 × 10<sup>−8</sup> to
+1.30 × 10<sup>−8</sup>). Again, the mean phylogeny-based generational
 substitution rate estimate for the humpback whales genome to the
 hippopotamus reference (1.17 x 10<sup>-8</sup>) was in close alignment
 with the pedigree-based mutation reate estimate. Mean phylogeny-based
@@ -1559,6 +1573,20 @@ is vital that genomic studies carefully consider how to process sequence
 data within the context of the targeted research question, and give
 consideration to the potential effects of pipeline parameters on the
 interpretation of their results.</p>
+<p>Because substitution rate variability among species within each
+infraorder was minimal, we report mean substitution rates estimated
+using the pygmy sperm whale reference genome, divergence from McGowen et
+al. (2020), and no correction for ancestral heterozygosity for both
+odontocetes (annual = 2.49 x 10<sup>-10</sup>, generational = 4.8 x
+10<sup>-9</sup>) and mysticetes (annual = 2.3 x 10<sup>-10</sup>,
+generational = 5.8 x 10<sup>-9</sup>). These estimates may be
+appropriate for use in studies of population genomics or “recent”
+evolutionary genomics. However, we recommend that any studies involving
+species not included in this study estimate a mutation rate using the
+method employed here; scripts for counting substitutions and estimating
+substitution rate are available at <a href="https://github.com/UW-WADE-lab/Mutation-rate-variability-in-cetaceans" class="uri">https://github.com/UW-WADE-lab/Mutation-rate-variability-in-cetaceans</a>.
+Specific rates for each species and reference genome included in this
+study are reported in Supplemental Table S1.</p>
 </div>
 </div>
 <div id="acknowledgements" class="section level2 unnumbered">
