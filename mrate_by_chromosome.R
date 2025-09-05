@@ -35,16 +35,16 @@ chrom_snp_data <- read.csv("SNPs_by_chromosome_Kbre.csv") %>%
   filter(abbrev != "Kbre") %>% 
   mutate(length = parse_number(length))
 
-# # accessing processed files containing SNPs partitioned by chromosome
+# accessing processed files containing SNPs partitioned by chromosome
 # data_files <- list.files("M:/Mutation_Rate/snp_counts", pattern = "chrom_snpcount.txt")
 # 
 # # Read the files in, add Pmac chrom.length
 # data_files_list <- lapply(paste0("M:/Mutation_Rate/snp_counts/",data_files),
 #                           function(x) {read.delim(file = x, header = FALSE, sep =" ") %>%
 #                           dplyr::rename("abbrev" = 1, "reference" = 2, "blank" = 3,
-#                           "hets" = 4, "hom" = 5, "aallele" = 6)} %>% 
-#                             filter(hom > 0) %>% 
-#                             cbind(chrom.length) %>% 
+#                           "hets" = 4, "hom" = 5, "aallele" = 6)} %>%
+#                             filter(hom > 0) %>%
+#                             cbind(chrom.length) %>%
 #                             dplyr::select(-blank))
 # 
 # # Combine them

@@ -9,7 +9,7 @@ library(tidyverse)
 genome_metadata <- read.csv("genome_metadata.csv") %>% 
   filter(reference == "Kbre")
 
-#### Get Pmac chromosome names -------------------------------------------------
+#### Get Kbre chromosome names -------------------------------------------------
 
 kbre_chrom <- read.csv("SNPs_by_chromosome_Kbre.csv") %>% 
   dplyr::select(GenBank, chrom.num) %>% 
@@ -139,7 +139,7 @@ for (i in 1:nrow(combined_data)) {
 code_noncode_data <- code_noncode_data %>% 
   mutate(suborder = case_when(species %in% c("Bmus","Egla","Bacu","Erob","Bric", "Mnov")~"Mysticete",
                    species %in% c("Kbre","Igeo","Pele","Mden","Oorc","Psin","Ddel",
-                                  "Hamp","Scoe","Ggri","Gmel","Lalb")~"Odontocete",
+                                  "Hamp","Scoe","Ggri","Gmel","Lalb", "Pcra")~"Odontocete",
                    TRUE~NA)) %>% 
   filter(species != "Kbre")
 
@@ -147,12 +147,16 @@ code_noncode_data <- code_noncode_data %>%
 
 coding_normality <- shapiro.test(code_noncode_data$rate)
 coding_normality
+# p < 0.05 means not normal
 
-code_noncode_aov <- aov(rate ~ snp_type, data = code_noncode_data %>% 
-                          filter(method == "noPI"))
-summary(code_noncode_aov)
-
-eta_squared(code_noncode_aov, partial = FALSE)
+# code_noncode_aov <- aov(rate ~ snp_type, data = code_noncode_data %>% 
+#                           filter(method == "noPI"))
+# summary(code_noncode_aov)
+# 
+# eta_squared(code_noncode_aov)
+code_kw <- kruskal.test(rate ~ snp_type, data = code_noncode_data %>% 
+                                             filter(method == "noPI"))
+code_kw
 
 order_code_noncode_aov <- code_noncode_data %>% 
   filter(method == "noPI") %>% 
@@ -208,5 +212,5 @@ ggplot(data=code_noncode_data, aes(x=suborder,y=rate,fill=snp_type)) +
 
 save(coding_difference, code_noncode_aov, 
      code_noncode_data, odon_coding_aov, 
-     coding_normality,
+     coding_normality, code_kw, 
      myst_coding_aov, file = "Mutation-rate-coding-noncoding.Rdata")
